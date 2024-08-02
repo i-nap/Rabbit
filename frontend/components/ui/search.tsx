@@ -10,7 +10,7 @@ const Search = () => {
       <form
         className={`relative transition-all duration-1000 ease-in-out  ${
           isOpen ? 'w-80' : 'w-12'
-        } h-12 bg-gray-100 rounded-full border-4 border-gray-100 flex items-center px-2`}
+        } h-12 bg-transparent rounded-full border-4 border-transparent flex items-center px-2`}
         onClick={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
