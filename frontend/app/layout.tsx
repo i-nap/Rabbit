@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="bg-gray-100">
+    <html lang="en" className="scrollbar-hide ">
+      <body className="bg-bg">
         <NavBar />
         {children} 
         </body>

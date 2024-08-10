@@ -22,6 +22,9 @@ const config: Config = {
     },
     extend: {
       colors: {
+        bg: '#f7f7f7',
+        text: '#343434',
+        subtext: '#818181',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -81,7 +84,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('tailwind-scrollbar-hide')],
 };
 
 export default config;

@@ -21,12 +21,11 @@ import {
 import ModeToggle from "./mode-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-
 import Search from "./ui/search";
 
 export function NavBar() {
   return (
-    <div className="flex items-center min-w-full w-full fixed justify-center p-2 z-[50] mt-[1rem] font-lato">
+    <div className="flex items-center w-full fixed justify-center p-2 z-[40] mt-[1rem] font-lato">
       <div className="flex justify-between md:w-[720px] w-[95%] border dark:border-zinc-900 dark:bg-black bg-opacity-10 relative backdrop-filter backdrop-blur-lg bg-white border-white border-opacity-20 rounded-xl p-2 shadow-lg">
         <Dialog>
           <SheetTrigger className="min-[825px]:hidden p-2 transition">
@@ -83,16 +82,14 @@ export function NavBar() {
             </Link>
           </NavigationMenuList>
         </NavigationMenu>
-        <div className="flex items-center gap-2 max-[825px]:hidden">
+        <div className="flex items-center gap-4 max-[825px]:hidden">
           <Link href="">
             <Search />
           </Link>
           <Link href="/automation">
-            <Button variant="ghost">
-              <Bell />
-            </Button>
+            <Bell className="hover:text-gray-500 transition-all duration-200 ease-in-out" />
           </Link>
-          <Avatar>
+          <Avatar className="hover:text-gray-500 transition-all duration-200 ease-in-out">
             <AvatarImage src="" />
             <AvatarFallback>
               <UserRound />
