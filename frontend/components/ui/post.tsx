@@ -34,7 +34,7 @@ const FeedPost: React.FC<FeedPostProps> = ({
   handleDownClick,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 mb-[2rem] hover:shadow-lg transition-all duration-200 ease-in-out text-text ">
+    <div className="bg-white rounded-xl shadow-md p-4 mb-[2rem] hover:shadow-lg transition-all duration-200 ease-in-out text-text ">
       <div className="flex items-center mb-2 font-lato">
         <div className="relative w-6 h-6 mr-2">
           <Image
@@ -51,7 +51,7 @@ const FeedPost: React.FC<FeedPostProps> = ({
       <p className="text-subtext mb-4 font-lato text-[16px]">{content}</p>
       {imageUrl && (
         <div className="mb-4 w-full ">
-          <div className="relative w-full h-[30rem] bg-black rounded-lg overflow-hidden">
+          <div className="relative w-full h-[30rem] bg-black rounded-2xl overflow-hidden">
             <Image
               src={imageUrl}
               alt={title}

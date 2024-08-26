@@ -74,7 +74,7 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 key={"card" + index}
-                className="last:pr-[5%] md:last:pr-[33%] rounded-lg"
+                className="last:pr-[5%] md:last:pr-[33%] rounded-xl"
               >
                 {item}
               </motion.div>
@@ -83,14 +83,14 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
         </div>
         <div className="flex justify-center gap-2 mt-4 md:mt-4">
           <button
-            className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center disabled:opacity-50"
+            className="h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center disabled:opacity-50"
             onClick={scrollLeft}
             disabled={!canScrollLeft}
           >
             <IconArrowNarrowLeft className="h-6 w-6 text-gray-500" />
           </button>
           <button
-            className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center disabled:opacity-50"
+            className="h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center disabled:opacity-50"
             onClick={scrollRight}
             disabled={!canScrollRight}
           >
@@ -160,10 +160,10 @@ export const Card = ({
               exit={{ opacity: 0, y: 50 }}
               ref={containerRef}
               layoutId={layout ? `card-${card.title}` : undefined}
-              className="max-w-5xl mx-auto bg-white dark:bg-neutral-900 h-fit z-[60] p-4 md:p-10 rounded-lg font-sans relative"
+              className="max-w-5xl mx-auto bg-white dark:bg-neutral-900 h-fit z-[60] p-4 md:p-10 rounded-xl font-sans relative"
             >
               <button
-                className="sticky top-4 h-8 w-8 right-0 ml-auto bg-black dark:bg-white rounded-lg flex items-center justify-center"
+                className="sticky top-4 h-8 w-8 right-0 ml-auto bg-black dark:bg-white rounded-xl flex items-center justify-center"
                 onClick={handleClose}
               >
                 <IconX className="h-6 w-6 text-neutral-100 dark:text-neutral-900" />
@@ -188,7 +188,7 @@ export const Card = ({
       <motion.button
         layoutId={layout ? `card-${card.title}` : undefined}
         onClick={handleOpen}
-        className="rounded-lg bg-gray-100 dark:bg-neutral-900 h-full w-56 md:h-full md:w-96 overflow-hidden flex flex-col items-start justify-start relative z-10"
+        className="rounded-xl bg-gray-100 dark:bg-neutral-900 h-full w-56 md:h-full md:w-96 overflow-hidden flex flex-col items-start justify-start relative z-10"
       >
         <div className="absolute h-full top-0 inset-x-0 bg-gradient-to-b from-black/50 via-transparent to-transparent z-30 pointer-events-none" />
         <div className="relative z-40 p-8">

@@ -135,7 +135,7 @@ export default function Feed() {
   };
   return (
     <>
-      <div className="pt-32 flex flex-col w-full h-screen max-h-[38rem] min-h-[30rem] ">
+      <div className="pt-32 flex flex-col w-full h-screen max-h-[38rem] min-h-[30rem]">
         <div className="flex w-full space-x-4 items-center justify-between">
           <h1 className="text-3xl font-head  m-0 p-0 text-text">Popular</h1>
           <div className="flex items-center">
