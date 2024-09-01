@@ -151,12 +151,12 @@ export default function Feed() {
             />
             <Dialog>
               <DialogTrigger asChild>
-                <div>
+
                   <Button className="ml-6">
                     <CirclePlus className="h-4 w-4" />{" "}
                     <span className="ml-1">Create</span>
                   </Button>
-                </div>
+
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto hide-scrollbar">
                 <DialogHeader>
@@ -212,7 +212,7 @@ export default function Feed() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Post</Button>
+                  <Button type="submit" className="w-full">Post</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

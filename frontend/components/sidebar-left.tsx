@@ -68,7 +68,7 @@ const inCommunitiesRecent = [
     communityImageUrl: "https://picsum.photos/id/24/367/267",
   },
 ]
-export default function LeftSide() {
+export default function SideBarLeft() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const handleTagsChange = (tags: string[]) => {
@@ -147,7 +147,7 @@ export default function LeftSide() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Post</Button>
+                  <Button type="submit" className="w-full">Create</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

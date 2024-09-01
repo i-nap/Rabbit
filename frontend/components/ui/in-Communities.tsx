@@ -1,9 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Image from "next/image";
 import { Separator } from "./separator";
-const tags = Array.from({ length: 50 }).map(
-  (_, i, a) => `v1.2.0-beta.${a.length - i}`
-)
 
 interface InCommunitiesProps {
   communityId: number;

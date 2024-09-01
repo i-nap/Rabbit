@@ -18,20 +18,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+
 
 import { cn } from "@/lib/utils"
 
@@ -40,8 +27,6 @@ const Avatar = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
 >(({ className, ...props }, ref) => (
   <>
-    <DropdownMenu>
-      <DropdownMenuTrigger>
         <AvatarPrimitive.Root
           ref={ref}
           className={cn(
@@ -50,22 +35,7 @@ const Avatar = React.forwardRef<
           )}
           {...props}
         />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 mt-4 font-lato">
-        <DropdownMenuLabel className="font-head">My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <LogIn className="mr-2 h-4 w-4" />
-            <span>Login</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <UserPlus className="mr-2 h-4 w-4" />
-            <span>Signup</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    
 
   </>
 ))
