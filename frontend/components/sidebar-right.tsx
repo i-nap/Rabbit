@@ -35,8 +35,9 @@ const Suggestions = [
 
 export default function SideBarRight() {
   return (
-    <div className="flex flex-col justify-between h-screen pt-[6rem] px-[1rem]">
+    <div className="flex flex-col justify-between h-screen pt-[6rem] px-[2rem]">
       <div className="flex-grow">
+        <div className="pl-[1rem]">
         <span className="font-lato text-[16px] text-subtext mb-[1rem] block">
           Suggestions For You:
         </span>
@@ -50,6 +51,8 @@ export default function SideBarRight() {
           />
         ))}
 
+        </div>
+        
         <Separator className="my-[2rem]" />
 
         <TopContributors />
