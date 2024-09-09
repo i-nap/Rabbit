@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useState } from "react";
 import Image from "next/image";
 import { Star } from "lucide-react";
@@ -32,7 +32,7 @@ export default function CommunityProfileHeader({ communityName }: CommunityProfi
   };
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full">
       {/* Background Image */}
       <div className="bg-white w-full overflow-hidden rounded-3xl">
         <div className="relative h-56 w-full">
@@ -66,15 +66,15 @@ export default function CommunityProfileHeader({ communityName }: CommunityProfi
               </div>
               <div className="flex text-xl space-x-2">
                 <span className="font-bold">455</span>
-                <span className=" text-gray-500">Active</span>
+                <span className="text-gray-500">Active</span>
               </div>
             </div>
           </div>
         </div>
-        <div className="flex flex-col mt-[5rem] mb-[2rem] space-y-2 px-12">
+        <div className="flex flex-col mt-[5rem] mb-[2rem] space-y-3 px-12">
           <div className="flex justify-between">
             <div className="flex items-center space-x-2">
-              <h1 className="text-3xl font-head  m-0 p-0 text-text">b/{communityName}</h1>
+              <h1 className="text-3xl font-head m-0 p-0 text-text">b/{communityName}</h1>
               <Star />
             </div>
             <div className="flex space-x-4">
@@ -82,7 +82,7 @@ export default function CommunityProfileHeader({ communityName }: CommunityProfi
               {/* Join/Leave Button */}
               <Button
                 className=""
-                variant={isJoined ? "secondary" : "default"}
+                variant={isJoined ? "destructive" : "outline"}
                 onClick={handleJoinToggle}
               >
                 <span>{isJoined ? "Leave" : "Join"}</span>
@@ -90,9 +90,20 @@ export default function CommunityProfileHeader({ communityName }: CommunityProfi
             </div>
           </div>
 
-          <span className="text-subtext mb-4 font-lato text-[16px]">
+          <span className="text-subtext font-lato text-[16px]">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit consequatur est, laudantium commodi ex dolorem eligendi perspiciatis assumenda temporibus magni modi veritatis ipsum atque, voluptas sapiente quasi nisi, quibusdam dolore.
           </span>
+
+          {/* Community Rules Section
+          <div className="text-subtext font-lato text-[16px]">
+            <h3 className="text-xl mb-1 font-head text-text">Community Rules</h3>
+            <ul>
+              <li>Respect everyone's opinion.</li>
+              <li>No spamming or advertising.</li>
+              <li>Keep posts relevant to the community theme.</li>
+              <li>Do not share personal information.</li>
+            </ul>
+          </div> */}
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import CommunityProfileFeed from "@/components/b/communityprofilefeed";
 import CommunityProfileHeader from "@/components/b/communityprofileheader";
 import Feed from "@/components/feed";
 import SideBarLeft from "@/components/sidebar-left";
@@ -21,8 +22,9 @@ export default function CommunityPage({
         <div className="w-[18%] h-full fixed left-0 top-0">
           <SideBarLeft />
         </div>
-        <div className="w-[75%] ml-[18%] pl-[3rem] pt-32 ">
+        <div className="pt-32 w-[75%] ml-[18%] pl-[3rem] h-full overflow-y-auto hide-scrollbar space-y-[2rem]">
             <CommunityProfileHeader communityName={communityName} />
+            <CommunityProfileFeed/>
         </div>
       </div>
     </>

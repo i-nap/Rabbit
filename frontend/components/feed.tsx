@@ -1,8 +1,7 @@
-'use client'
+"use client";
 import FeedPost from "./ui/post";
 import { Separator } from "@/components/ui/separator";
 import { ComboBoxResponsive } from "./ui/combobox";
-import { Button } from "@/components/ui/button";
 import CreatePostDialog from "./ui/createpostdialog"; // Import the new dialog component
 import { useEffect, useState } from "react";
 import { Card, Carousel } from "./ui/headCarousel";
@@ -52,6 +51,12 @@ const items = [
     category: "Category 2",
     content: <p>This is the content for card 1.</p>,
   },
+  {
+    src: "https://picsum.photos/id/237/200/300",
+    title: "Card Title 3",
+    category: "Category 3",
+    content: <p>This is the content for card 1.</p>,
+  },
   // Add more card items as needed
 ];
 
@@ -65,30 +70,6 @@ export default function Feed() {
       ))
     );
   }, []);
-
-  const [voteStatus, setVoteStatus] = useState(
-    posts.map(() => ({ upClicked: false, downClicked: false }))
-  );
-
-  const handleUpClick = (index: number) => {
-    setVoteStatus((prev) =>
-      prev.map((status, i) =>
-        i === index
-          ? { upClicked: !status.upClicked, downClicked: false }
-          : status
-      )
-    );
-  };
-
-  const handleDownClick = (index: number) => {
-    setVoteStatus((prev) =>
-      prev.map((status, i) =>
-        i === index
-          ? { downClicked: !status.downClicked, upClicked: false }
-          : status
-      )
-    );
-  };
 
   return (
     <>
@@ -115,15 +96,8 @@ export default function Feed() {
       </div>
 
       <div className="pt-[2rem] flex flex-col w-full h-full">
-        {posts.map((post, index) => (
-          <FeedPost
-            key={post.id}
-            {...post}
-            upClicked={voteStatus[index].upClicked}
-            downClicked={voteStatus[index].downClicked}
-            handleUpClick={() => handleUpClick(index)}
-            handleDownClick={() => handleDownClick(index)}
-          />
+        {posts.map((post) => (
+          <FeedPost key={post.id} {...post} />
         ))}
       </div>
     </>
