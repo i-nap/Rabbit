@@ -8,8 +8,7 @@ export default function LeftSide() {
         <Link href="/"><ArrowLeft /></Link>
 
         <div className="flex space-x-4">
-          <House className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
-          <span>Name</span>
+          <span>Rabbit</span>
         </div>
       </div>
       <div className="text-2xl sm:text-3xl lg:text-4xl leading-snug lg:leading-relaxed mr-8 sm:mr-12 lg:mr-[6rem]">
