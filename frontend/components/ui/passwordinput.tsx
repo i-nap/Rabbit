@@ -7,9 +7,13 @@ import { Label } from './label';
 interface PasswordInputProps {
     id: string;
     label: string;
+    type?: string;
+
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const PasswordInput: React.FC<PasswordInputProps> = ({ id, label }) => {
+export const PasswordInput: React.FC<PasswordInputProps> = ({ id, label,value,onChange }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -19,6 +23,8 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({ id, label }) => {
         <Input
           id={id}
           type={showPassword ? 'text' : 'password'}
+          value={value}  // Set the input value
+          onChange={onChange}  // Handle changes
           className="pr-12 w-full"
         />
         <Button
