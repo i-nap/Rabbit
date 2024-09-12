@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { ArrowDown, ArrowUp, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from 'next/link';
 
 interface FeedPostProps {
   id: number;
@@ -17,6 +18,7 @@ interface FeedPostProps {
 }
 
 const FeedPost: React.FC<FeedPostProps> = ({
+  id,
   subreddit,
   subredditImage,
   time,
@@ -100,10 +102,12 @@ const FeedPost: React.FC<FeedPostProps> = ({
           />
         </div>
         <div className="flex space-x-2">
+          <Link href={`/${id}`}>
           <Button className="w-20 hover:text-gray-500 transition-all duration-200 ease-in-out">
             <MessageCircle className="cursor-pointer" />
             <span className="ml-1">{comments}</span>
           </Button>
+          </Link>
         </div>
       </div>
     </div>

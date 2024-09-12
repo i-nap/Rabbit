@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +33,18 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+
     private static final int OTP_LENGTH = 6;
 
     public User registerUser(String fName, String lName, String username, String email, String password) {
+        // Check if email or username already exists
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new IllegalArgumentException("Email already registered.");
+        }
+
         // Hash the password and create a new user (initially disabled)
         String encodedPassword = passwordEncoder.encode(password);
         User newUser = User.builder()
@@ -139,5 +149,20 @@ public class UserService {
             }
         }
         return false;
+    }
+
+    public User validateUser(String email, String rawPassword) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        // Check if user exists and the raw password matches the stored encrypted password
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+            if (passwordEncoder.matches(rawPassword, user.getPassword())) {
+                return user;  // Password matches, return the user
+            }
+        }
+        return null;  // User not found or password doesn't match
     }
 }

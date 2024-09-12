@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import * as React from "react";
 import Link from "next/link";
@@ -41,10 +41,24 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
 import LoginDialog from "./ui/logindialog";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from 'react';
+
 
 export function NavBar() {
   // Manage the state for the login dialog
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Use URLSearchParams to parse the query parameters
+    const searchParams = new URLSearchParams(window.location.search);
+    const loginQuery = searchParams.get('login'); // Get the "login" query parameter
+
+    if (loginQuery === 'true') {
+      setIsDialogOpen(true); // Open the login dialog if ?login=true is present
+    }
+  }, []);
 
   return (
     <div className="flex items-center w-full fixed justify-center p-2 z-[40] mt-[1rem] font-lato">

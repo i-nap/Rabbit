@@ -8,6 +8,7 @@ interface FormFieldProps {
   type?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  className?: string;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -16,6 +17,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   type = 'text',
   value,
   onChange,
+  className = '', // Default to an empty string
 }) => {
   return (
     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -24,7 +26,8 @@ export const FormField: React.FC<FormFieldProps> = ({
         id={id}
         type={type}
         value={value}  
-        onChange={onChange} 
+        onChange={onChange}
+        className={className}
       />
     </div>
   );

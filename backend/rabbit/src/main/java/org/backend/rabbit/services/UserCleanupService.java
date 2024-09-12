@@ -20,7 +20,7 @@ public class UserCleanupService {
     private OtpRepository otpRepository;
 
     // Run every hour to clean up unverified users
-    @Scheduled(initialDelay = 5000, fixedRate = 3600000) // Run immediately and then every hour
+    @Scheduled(initialDelay = 0, fixedRate = 3600000) // Run immediately and then every hour
     public void cleanUpUnverifiedUsers() {
         Instant expirationTime = Instant.now().minusSeconds(300);  // OTP expires after 5 minutes
 

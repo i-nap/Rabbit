@@ -18,6 +18,8 @@ export default function CommunityPage({
 
   return (
     <>
+
+    
       <div className="flex w-full h-screen">
         <div className="w-[18%] h-full fixed left-0 top-0">
           <SideBarLeft />

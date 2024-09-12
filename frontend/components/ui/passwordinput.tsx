@@ -8,12 +8,12 @@ interface PasswordInputProps {
     id: string;
     label: string;
     type?: string;
-
+    className?: string; 
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const PasswordInput: React.FC<PasswordInputProps> = ({ id, label,value,onChange }) => {
+export const PasswordInput: React.FC<PasswordInputProps> = ({ id, label,value,onChange,className}) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -25,7 +25,8 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({ id, label,value,on
           type={showPassword ? 'text' : 'password'}
           value={value}  // Set the input value
           onChange={onChange}  // Handle changes
-          className="pr-12 w-full"
+          className={`${className} pr-12 w-full`}
+
         />
         <Button
           type="button"

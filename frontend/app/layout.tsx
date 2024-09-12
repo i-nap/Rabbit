@@ -1,3 +1,4 @@
+'use client'
 // app/layout.tsx
 import "./globals.css";
 import LayoutWithNav from "../components/signup/layoutwithnav"; // Import your client-side component
