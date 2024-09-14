@@ -45,7 +45,7 @@ npm start
 ## Contributing
 ```bash
 # Clone the forked repository to your local machine
-git clone https://github.com/your-github-username/rabbit.git
+git clone https://github.com/i-nap/rabbit.git
 
 # Navigate to the project directory
 cd rabbit
