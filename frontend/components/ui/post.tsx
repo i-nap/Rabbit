@@ -1,71 +1,93 @@
-"use client";
 import React, { useState } from "react";
 import Image from "next/image";
 import { ArrowDown, ArrowUp, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from 'next/link';
+import Link from "next/link";
 
 interface FeedPostProps {
   id: number;
-  subreddit: string;
-  subredditImage: string;
+  community: string;
+  communityImage: string;
   time: string;
   title: string;
   content: string;
   votes: number;
   comments: number;
   imageUrl?: string;
+  userId: number; // Assuming you have userId available for voting
 }
 
 const FeedPost: React.FC<FeedPostProps> = ({
   id,
-  subreddit,
-  subredditImage,
+  community,
+  communityImage,
   time,
   title,
   content,
   votes,
   comments,
   imageUrl,
+  userId,
 }) => {
+  console.log(community);
   const [upClicked, setUpClicked] = useState(false);
   const [downClicked, setDownClicked] = useState(false);
   const [voteCount, setVoteCount] = useState(votes);
 
-  const handleUpClick = () => {
-    if (upClicked) {
-      setUpClicked(false);
-      setVoteCount(voteCount - 1);
-    } else {
-      setUpClicked(true);
-      setDownClicked(false);
-      setVoteCount(downClicked ? voteCount + 2 : voteCount + 1);
+  const handleVote = async (isUpvote: boolean) => {
+    try {
+      // console.log('Is upvote:', isUpvote);
+      
+      const response = await fetch(`http://localhost:8080/api/posts/${id}/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, isUpvote }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to register vote");
+      }
+
+      // Check the response from backend and update the vote count accordingly
+      setVoteCount(result.newVoteCount);
+
+      // Update the button states based on whether it was an upvote or downvote
+      if (isUpvote) {
+        setUpClicked((prev) => !prev); // Toggle upvote state
+        setDownClicked(false); // Reset downvote
+      } else {
+        setDownClicked((prev) => !prev); // Toggle downvote state
+        setUpClicked(false); // Reset upvote
+      }
+    } catch (error) {
+      console.error("Error voting:", error);
     }
   };
 
-  const handleDownClick = () => {
-    if (downClicked) {
-      setDownClicked(false);
-      setVoteCount(voteCount + 1);
-    } else {
-      setDownClicked(true);
-      setUpClicked(false);
-      setVoteCount(upClicked ? voteCount - 2 : voteCount - 1);
-    }
+  const handleUpClick = () => {
+    handleVote(true); // Sends an upvote to the backend
   };
+
+  const handleDownClick = () => {
+    handleVote(false); // Sends a downvote to the backend
+  };
+
 
   return (
     <div className="bg-white rounded-xl shadow-md p-4 mb-[2rem] hover:shadow-lg transition-all duration-200 ease-in-out text-text">
       <div className="flex items-center mb-2 font-lato">
         <div className="relative w-6 h-6 mr-2">
           <Image
-            src={subredditImage}
-            alt={`r/${subreddit}`}
+            src={communityImage}
+            alt={`b/${community}`}
             fill
             className="rounded-full"
           />
         </div>
-        <span className="font-bold text-sm">r/{subreddit}</span>
+        <span className="font-bold text-sm">b/{community}</span>
         <span className="text-xs text-subtext ml-2">{time}</span>
       </div>
       <h2 className="text-2xl font-bold mb-2 font-head">{title}</h2>
@@ -77,7 +99,7 @@ const FeedPost: React.FC<FeedPostProps> = ({
               src={imageUrl}
               alt={title}
               fill
-              style={{ objectFit: 'contain' }}
+              style={{ objectFit: "contain" }}
               className="absolute inset-0"
             />
           </div>
@@ -103,10 +125,10 @@ const FeedPost: React.FC<FeedPostProps> = ({
         </div>
         <div className="flex space-x-2">
           <Link href={`/${id}`}>
-          <Button className="w-20 hover:text-gray-500 transition-all duration-200 ease-in-out">
-            <MessageCircle className="cursor-pointer" />
-            <span className="ml-1">{comments}</span>
-          </Button>
+            <Button className="w-20 hover:text-gray-500 transition-all duration-200 ease-in-out">
+              <MessageCircle className="cursor-pointer" />
+              <span className="ml-1">{comments}</span>
+            </Button>
           </Link>
         </div>
       </div>

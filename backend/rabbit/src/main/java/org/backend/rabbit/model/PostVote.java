@@ -6,28 +6,30 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
 @Entity
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Otp {
+@AllArgsConstructor
+public class PostVote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String otpCode;
+    @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
-    private Instant generatedAt;
+    private boolean isUpvote;
 
-    private boolean isVerified;
+    public PostVote(Post post, User user, boolean isUpvote) {
+        this.post = post;
+        this.user = user;
+        this.isUpvote = isUpvote;
+    }
 }

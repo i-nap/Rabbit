@@ -43,19 +43,19 @@ interface TagSearchProps {
     };
   
     return (
-      <div className="w-full max-w-md mx-auto">
-        <div className="flex flex-wrap gap-2 mb-4">
-            <div className='flex space-x-[1rem]'>
+      <div className="w-full mx-auto">
+        <div className="flex flex-wrap gap-2 ">
+            <div className='flex space-x-[1rem] '>
 
             
           {selectedTags.map((tag) => (
-            <Badge key={tag} className="flex items-center text-white rounded-xl font-head">
+            <Badge key={tag} className="flex items-center text-white rounded-xl font-head mb-2">
               {tag}
               <Button
                 onClick={() => handleRemoveTag(tag)}
-                className="text-[16px] text-gray-200 hover:text-gray-100 ml-[5px] w-1 h-10"
+                className="text-[16px] text-gray-200 hover:  ml-[5px] w-1 h-10 hover:text-red-500"
               >
-                ×
+                x
               </Button>
             </Badge>
           ))}

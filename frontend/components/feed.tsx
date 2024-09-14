@@ -1,35 +1,23 @@
-"use client";
+import React, { useState, useEffect } from "react";
+import axios from "axios"; // Import axios
 import FeedPost from "./ui/post";
 import { Separator } from "@/components/ui/separator";
 import { ComboBoxResponsive } from "./ui/combobox";
-import CreatePostDialog from "./ui/createpostdialog"; // Import the new dialog component
-import { useEffect, useState } from "react";
+import CreatePostDialog from "./ui/createpostdialog";
 import { Card, Carousel } from "./ui/headCarousel";
-import { Label } from "./ui/label";
+import { Label } from "@/components/ui/label";
 
-const posts = [
-  {
-    id: 1,
-    subreddit: "reactjs",
-    subredditImage: "https://picsum.photos/id/24/367/267",
-    time: "1 hour ago",
-    title: "How to use useState hook?",
-    content: "I'm having trouble using the useState hook in React...",
-    votes: 100,
-    comments: 50,
-  },
-  {
-    id: 2,
-    subreddit: "javascript",
-    subredditImage: "https://picsum.photos/id/24/367/267",
-    time: "2 hours ago",
-    title: "Understanding closures",
-    content: "Can someone explain closures in JavaScript?",
-    votes: 200,
-    comments: 80,
-    imageUrl: "https://picsum.photos/id/26/367/267",
-  },
-];
+interface Post {
+  id: number;
+  community: string; // If the backend sends 'community' as a string instead of an object
+  communityImage: string;
+  time: string;
+  title: string;
+  content: string;
+  votes: number;
+  comments: number;
+  imageUrl?: string;
+}
 
 const optionsCountry = [
   { value: "all", label: "All" },
@@ -57,11 +45,12 @@ const items = [
     category: "Category 3",
     content: <p>This is the content for card 1.</p>,
   },
-  // Add more card items as needed
 ];
 
 export default function Feed() {
   const [cards, setCards] = useState<JSX.Element[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
 
   useEffect(() => {
     setCards(
@@ -70,6 +59,22 @@ export default function Feed() {
       ))
     );
   }, []);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/api/posts/getposts");
+        setPosts(response.data); // Axios automatically parses JSON
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      }
+    };
+    fetchPosts();
+  }, []);
+
+  const handleSelectionChange = (value: string) => {
+    setSelectedCountry(value);
+  };
 
   return (
     <>
@@ -86,8 +91,8 @@ export default function Feed() {
               initialSelection="All"
               widthMobile="100px"
               showImages={false}
+              onSelectionChange={handleSelectionChange} // Now passing the handler
             />
-            {/* Use the CreatePostDialog Component */}
             <CreatePostDialog />
           </div>
         </div>
@@ -97,7 +102,19 @@ export default function Feed() {
 
       <div className="pt-[2rem] flex flex-col w-full h-full">
         {posts.map((post) => (
-          <FeedPost key={post.id} {...post} />
+          <FeedPost
+            key={post.id}
+            userId={2}
+            id={post.id}
+            community={post.community}
+            communityImage={post.communityImage}
+            time={post.time}
+            title={post.title}
+            content={post.content}
+            votes={post.votes}
+            comments={post.comments}
+            imageUrl={post.imageUrl}
+          />
         ))}
       </div>
     </>
