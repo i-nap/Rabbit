@@ -40,17 +40,22 @@ npm install
 
 # Start the application
 npm start
+```
 
-# To contribute to the project, fork it first and clone your fork
+## Contributing
+```bash
+# Clone the forked repository to your local machine
 git clone https://github.com/your-github-username/rabbit.git
 
-# Create a new branch for your feature
-git checkout -b your-feature-branch
+# Navigate to the project directory
+cd rabbit
 
-# Make changes and commit them
-git commit -am "Add some feature"
+# Create a new branch for your feature or fix
+git checkout -b feature-or-fix-branch-name
 
-# Push to your fork
-git push origin your-feature-branch
+# Make your changes and commit them
+git add .
+git commit -m "Description of the feature or fix"
 
-# Create a pull request from your fork on GitHub
+# Push your branch to your forked repository
+git push origin feature-or-fix-branch-name
