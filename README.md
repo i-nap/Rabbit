@@ -34,12 +34,36 @@ git clone https://github.com/your-username/rabbit.git
 
 # Navigate to the directory
 cd rabbit
+```
+
+# Frontend
+```bash
+
+# Navigate to the directory
+cd frontend
 
 # Install dependencies
 npm install
 
 # Start the application
-npm start
+npm run dev
+```
+
+# Backend
+```bash
+
+# Navigate to the directory
+cd backend
+
+#Ensure PostgreSQL is running.
+
+# Update the application.properties file with your PostgreSQL configuration:
+spring.datasource.url=jdbc:postgresql://localhost:5432/rabbit_db
+spring.datasource.username=your-username
+spring.datasource.password=your-password
+
+# Start the application
+./mvnw spring-boot:run
 ```
 
 ## Contributing
