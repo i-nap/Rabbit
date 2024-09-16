@@ -1,21 +1,21 @@
-'use client'
-// app/layout.tsx
-import "./globals.css";
-import LayoutWithNav from "../components/signup/layoutwithnav"; // Import your client-side component
-import { Toaster } from "@/components/ui/toaster"
+'use client';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import './globals.css';
+import { ReactNode } from 'react';
+import { Provider } from 'react-redux';
+import { store } from './store/store'; // Path to your Redux store
+import LayoutWithNav from '../components/signup/layoutwithnav'; // Your client-side layout component
+import { Toaster } from '@/components/ui/toaster'; // Import Toaster
+
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="scrollbar-hide">
       <body className="bg-bg">
-        {/* Use the client-side component here */}
-        <LayoutWithNav>{children}</LayoutWithNav>
-        <Toaster />
-
+        {/* Wrap everything with Redux Provider */}
+        <Provider store={store}>
+          <LayoutWithNav>{children}</LayoutWithNav>
+          <Toaster />
+        </Provider>
       </body>
     </html>
   );

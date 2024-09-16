@@ -5,28 +5,47 @@ import { Star } from "lucide-react";
 import { Button } from "../ui/button";
 import CreatePostDialog from '../ui/createpostdialog';
 import { useToast } from "../../hooks/use-toast"; // Ensure correct path
+import axios from 'axios'; // Import axios
 
 type CommunityProfileProps = {
   communityName: string;
+  communityId: number;  // Add communityId prop to pass to the backend
+  userId: number;  // Assume you have user information available
 };
 
-export default function CommunityProfileHeader({ communityName }: CommunityProfileProps) {
+export default function CommunityProfileHeader({ communityName, communityId, userId }: CommunityProfileProps) {
   const [isJoined, setIsJoined] = useState(false); // Track join state
   const { toast } = useToast(); // Use the toast hook
 
-  const handleJoinToggle = () => {
-    setIsJoined(!isJoined); // Toggle join state
-
-    // Trigger a Toast notification when joined or left
-    if (!isJoined) {
-      toast({
-        title: `You joined the ${communityName} community!`,
-        description: "Welcome to the community, start exploring the content.",
+  const handleJoinToggle = async () => {
+    try {
+      const response = await axios.post(`http://localhost:8080/api/community/${communityId}/${isJoined ? 'leave' : 'join'}`, {
+        userId: userId, // Send userId in the request body
       });
-    } else {
+
+      if (response.status === 200) {
+        setIsJoined(!isJoined); // Toggle join state
+
+        // Trigger a Toast notification when joined or left
+        if (!isJoined) {
+          toast({
+            title: `You joined the ${communityName} community!`,
+            description: "Welcome to the community, start exploring the content.",
+          });
+        } else {
+          toast({
+            title: `You left the ${communityName} community.`,
+            description: "Feel free to rejoin anytime!",
+          });
+        }
+      } else {
+        throw new Error("Failed to update community status.");
+      }
+    } catch (error) {
+      console.error(error);
       toast({
-        title: `You left the ${communityName} community.`,
-        description: "Feel free to rejoin anytime!",
+        title: "Error",
+        description: "An error occurred while joining/leaving the community.",
       });
     }
   };
@@ -93,17 +112,6 @@ export default function CommunityProfileHeader({ communityName }: CommunityProfi
           <span className="text-subtext font-lato text-[16px]">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit consequatur est, laudantium commodi ex dolorem eligendi perspiciatis assumenda temporibus magni modi veritatis ipsum atque, voluptas sapiente quasi nisi, quibusdam dolore.
           </span>
-
-          {/* Community Rules Section
-          <div className="text-subtext font-lato text-[16px]">
-            <h3 className="text-xl mb-1 font-head text-text">Community Rules</h3>
-            <ul>
-              <li>Respect everyone's opinion.</li>
-              <li>No spamming or advertising.</li>
-              <li>Keep posts relevant to the community theme.</li>
-              <li>Do not share personal information.</li>
-            </ul>
-          </div> */}
         </div>
       </div>
     </div>

@@ -2,8 +2,10 @@ package org.backend.rabbit.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.backend.rabbit.model.Community;
 import org.backend.rabbit.model.Otp;
 import org.backend.rabbit.model.User;
+import org.backend.rabbit.repository.CommunityRepository;
 import org.backend.rabbit.repository.OtpRepository;
 import org.backend.rabbit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ import java.util.Optional;
 public class UserService {
 
     @Autowired
+    private CommunityRepository communityRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -36,7 +41,7 @@ public class UserService {
 
     private static final int OTP_LENGTH = 6;
 
-    public User registerUser(String fName, String lName, String username, String email, String password) {
+    public User registerUser(String fName, String lName, String username, String email, String password, String profilePictureUrl) {
         // Check if email or username already exists
         if (userRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("Username already exists.");
@@ -53,6 +58,7 @@ public class UserService {
                 .username(username)
                 .email(email)
                 .password(encodedPassword)
+                .profilePictureUrl(profilePictureUrl)  // Set profile picture URL
                 .enabled(false)  // User is disabled until OTP verification
                 .build();
 
@@ -62,6 +68,10 @@ public class UserService {
         sendOtp(newUser);
 
         return newUser;
+    }
+
+    private void editProfile(User user){
+
     }
 
     private void sendOtp(User user) {

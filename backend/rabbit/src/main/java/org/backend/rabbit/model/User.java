@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
-
 @Entity
 @Table(name="users")
 @Data
@@ -45,10 +44,23 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.createdAt = Instant.now();
-
     }
 
+    // One-to-Many relationship for OTPs
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Otp> otps;
 
+    // New Many-to-Many relationship for community subscriptions
+    @ManyToMany
+    @JoinTable(
+            name = "user_community",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "community_id")
+    )
+    private List<Community> subscribedCommunities;
+
+    @Column(nullable = true) // Nullable is true to make it optional
+    private String profilePictureUrl;
+
 }
+

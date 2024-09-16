@@ -9,6 +9,8 @@ interface FormFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
+  placeholder?: string;
+  disabled?: boolean;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -17,7 +19,9 @@ export const FormField: React.FC<FormFieldProps> = ({
   type = 'text',
   value,
   onChange,
-  className = '', // Default to an empty string
+  className = '',
+  placeholder, // Default to an empty string
+  disabled = false
 }) => {
   return (
     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -28,6 +32,8 @@ export const FormField: React.FC<FormFieldProps> = ({
         value={value}  
         onChange={onChange}
         className={className}
+        placeholder={placeholder || ''} // Default to an empty string
+      disabled={disabled}
       />
     </div>
   );

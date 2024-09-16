@@ -50,7 +50,6 @@ public class PostService {
                         post.getImageUrl()))
                 .collect(Collectors.toList());
     }
-
     public int voteOnPost(Long postId, Long userId, boolean isUpvote) {
         // Fetch user and post entities
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -60,19 +59,27 @@ public class PostService {
         Optional<PostVote> existingVoteOpt = postVoteRepository.findByPostAndUser(post, user);
 
         // If a vote already exists
-        System.out.println(isUpvote);
         if (existingVoteOpt.isPresent()) {
             PostVote existingVote = existingVoteOpt.get();
 
             if (existingVote.isUpvote() == isUpvote) {
                 // User is toggling the same vote (remove the vote)
                 postVoteRepository.delete(existingVote);
-                post.setVotes(isUpvote ? post.getVotes() - 1 : post.getVotes() + 1);
+                if (isUpvote) {
+                    post.setVotes(Math.max(0, post.getVotes() - 1)); // Remove the upvote
+                } else {
+                    // When removing a downvote, don't increase the vote count
+                    // Simply allow the vote to remain unchanged
+                }
             } else {
                 // User is switching votes (upvote to downvote or vice versa)
                 existingVote.setUpvote(isUpvote);
                 postVoteRepository.save(existingVote);
-                post.setVotes(isUpvote ? post.getVotes() + 2 : post.getVotes() - 2);
+                if (isUpvote) {
+                    post.setVotes(post.getVotes() + 2); // Switching from downvote to upvote
+                } else {
+                    post.setVotes(Math.max(0, post.getVotes() - 2)); // Switching from upvote to downvote
+                }
             }
         } else {
             // User has not voted yet, so create a new vote
@@ -81,7 +88,11 @@ public class PostService {
             newVote.setUser(user);
             newVote.setUpvote(isUpvote);
             postVoteRepository.save(newVote);
-            post.setVotes(isUpvote ? post.getVotes() + 1 : post.getVotes() - 1);
+            if (isUpvote) {
+                post.setVotes(post.getVotes() + 1); // First-time upvote
+            } else {
+                post.setVotes(Math.max(0, post.getVotes() - 1)); // First-time downvote, ensuring no negative vote count
+            }
         }
 
         // Save the updated post

@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { useState } from "react";
+import { useDispatch } from "react-redux";  // Import useDispatch
 import axios from "axios";
+import { loginSuccess } from "@/app/slices/userSlice";  // Import the loginSuccess action
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./dialog";
 import { Button } from "./button";
 import { Input } from "./input";
@@ -20,6 +22,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onOpenChange }) => {
     password: "",
   });
   const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch();  // Get the dispatch function from Redux
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +37,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onOpenChange }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+
     try {
       const response = await axios.post("http://localhost:8080/api/auth/login", formData, {
         headers: {
@@ -42,8 +46,20 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onOpenChange }) => {
       });
 
       if (response.status === 200) {
-        const token = response.data; // Assuming the token is returned in the response
-        localStorage.setItem("jwt", token); // Store the JWT token in localStorage
+        const { token, username, email, profilePicture,firstName,lastName,createdAt,tokenExpiration } = response.data;
+        const userInfo = { username, email, profilePicture, firstName, lastName, createdAt};
+        const expirationDate = new Date(tokenExpiration).getTime();  // Convert to timestamp if needed
+
+        // Store the JWT token in localStorage
+        localStorage.setItem("jwt", token);
+        localStorage.setItem("tokenExpiration", tokenExpiration); // Save expiration time in localStorage
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+        console.log("Received token:", token);
+        console.log("Received userInfo:", userInfo);
+        // Dispatch loginSuccess action to Redux
+        dispatch(loginSuccess({ token, userInfo, tokenExpiration: expirationDate }));
+
         alert("Login successful!");
         onOpenChange(false); // Close the dialog after successful login
       }

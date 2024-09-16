@@ -71,5 +71,37 @@ public class CommunityController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+    @PostMapping("/{communityId}/join")
+    public ResponseEntity<Map<String, String>> joinCommunity(
+            @PathVariable Long communityId,
+            @RequestParam("userId") Long userId) {
+
+        Map<String, String> response = new HashMap<>();
+        try {
+            communityService.subscribeToCommunity(userId, communityId);
+            response.put("message", "Joined the community successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "Error joining community");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // Endpoint to leave a community
+    @PostMapping("/{communityId}/leave")
+    public ResponseEntity<Map<String, String>> leaveCommunity(
+            @PathVariable Long communityId,
+            @RequestParam("userId") Long userId) {
+
+        Map<String, String> response = new HashMap<>();
+        try {
+            communityService.unsubscribeFromCommunity(userId, communityId);
+            response.put("message", "Left the community successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "Error leaving community");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }
 

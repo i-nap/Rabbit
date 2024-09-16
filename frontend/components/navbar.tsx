@@ -1,20 +1,9 @@
-'use client'
+'use client';
 
 import * as React from "react";
 import Link from "next/link";
-import { Bell, LogIn, MenuIcon, UserPlus, UserRound } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Bell, LogIn, UserPlus, UserRound, UserCircle } from "lucide-react";  // Import UserCircle for logged-in without profile pic
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,41 +13,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  NavigationMenu,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import {
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import ModeToggle from "@/components/mode-toggle";
+import { NavigationMenu, NavigationMenuList } from "@/components/ui/navigation-menu";
 import Search from "@/components/ui/search";
-import { Label } from "@radix-ui/react-label";
-import { Input } from "./ui/input";
-import { Checkbox } from "./ui/checkbox";
 import LoginDialog from "./ui/logindialog";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from 'react';
-
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/app/store/store";  // Import RootState from Redux store
+import { logout } from "@/app/slices/userSlice";  // Import logout action
 
 export function NavBar() {
   // Manage the state for the login dialog
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  
+  // Use Redux to manage user login state
+  const { isLoggedIn, userInfo } = useSelector((state: RootState) => state.user);
+  console.log(userInfo);
+  const dispatch = useDispatch();
+  
   const router = useRouter();
 
-  useEffect(() => {
-    // Use URLSearchParams to parse the query parameters
-    const searchParams = new URLSearchParams(window.location.search);
-    const loginQuery = searchParams.get('login'); // Get the "login" query parameter
-
-    if (loginQuery === 'true') {
-      setIsDialogOpen(true); // Open the login dialog if ?login=true is present
-    }
-  }, []);
+  // Handle logout
+  const handleLogout = () => {
+    dispatch(logout());  // Dispatch logout action
+    localStorage.removeItem('jwt'); // Remove JWT token from localStorage
+    localStorage.removeItem('user'); // Remove user info from localStorage
+    router.push('/'); // Redirect to homepage after logout
+  };
 
   return (
     <div className="flex items-center w-full fixed justify-center p-2 z-[40] mt-[1rem] font-lato">
@@ -77,39 +58,63 @@ export function NavBar() {
           <Link href="">
             <Search />
           </Link>
-          <Link href="/automation">
-            <Bell className="hover:text-gray-500 transition-all duration-200 ease-in-out" />
-          </Link>
+
+          {/* Show notification icon only when logged in */}
+          {isLoggedIn && (
+            <Link href="/automation">
+              <Bell className="hover:text-gray-500 transition-all duration-200 ease-in-out" />
+            </Link>
+          )}
 
           {/* Account Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Avatar className="hover:text-gray-500 transition-all duration-200 ease-in-out">
-                <AvatarImage src="" />
-                <AvatarFallback>
-                  <UserRound />
-                </AvatarFallback>
+                {isLoggedIn && userInfo?.profilePicture ? (
+                  // Show profile picture when available
+                  <AvatarImage src={userInfo.profilePicture} alt="Profile Picture" />
+                ) : isLoggedIn ? (
+                  // Show a different icon if logged in but no profile picture
+                  <AvatarFallback>
+                    <UserCircle />
+                  </AvatarFallback>
+                ) : (
+                  // Show default icon when not logged in
+                  <AvatarFallback>
+                    <UserRound />
+                  </AvatarFallback>
+                )}
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 mt-4 font-head text-text">
               <DropdownMenuLabel className="font-head">
-                My Account
+                {isLoggedIn ? `Hello, ${userInfo?.username || 'User'}` : 'My Account'}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                {/* Login Trigger */}
-                <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
-                  <LogIn className="mr-2 h-4 w-4" />
-                  <span>Login</span>
-                </DropdownMenuItem>
-
-                {/* Signup Link */}
-                <a href="/signup">
-                  <DropdownMenuItem>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    <span>Signup</span>
-                  </DropdownMenuItem>
-                </a>
+                {isLoggedIn ? (
+                  <>
+                    <DropdownMenuItem onClick={() => router.push('/editprofile')}>
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
+                      <LogIn className="mr-2 h-4 w-4" />
+                      <span>Login</span>
+                    </DropdownMenuItem>
+                    <a href="/signup">
+                      <DropdownMenuItem>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        <span>Signup</span>
+                      </DropdownMenuItem>
+                    </a>
+                  </>
+                )}
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>

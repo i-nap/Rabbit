@@ -57,9 +57,10 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
             </div>
             <div className="pt-32 w-[64%] ml-[18%] mr-[18%] p-[3rem] overflow-y-auto hide-scrollbar">
                 <FeedPost
+                           userId={2}
                     id={post.id}
-                    subreddit={post.subreddit}
-                    subredditImage={post.subredditImage}
+                    community={post.subreddit}
+                    communityImage={post.subredditImage}
                     time={post.time}
                     title={post.title}
                     content={post.content}

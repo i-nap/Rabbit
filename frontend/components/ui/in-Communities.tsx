@@ -17,6 +17,7 @@ const InCommunities: React.FC<InCommunitiesProps> = ({
     <>
 
       <div className="text-[16px] font-lato  pb-[1rem]  flex items-center">
+        
         <Image src={communityLogoUrl} alt={communityLogoUrl} width={24} height={24} className="w-6 h-6 mr-2 rounded-full" />
         {communityName}
       </div>
