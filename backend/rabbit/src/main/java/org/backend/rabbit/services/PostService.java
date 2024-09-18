@@ -47,6 +47,7 @@ public class PostService {
                         post.getContent(),
                         post.getVotes(),
                         post.getComments().size(),
+                        post.getUser().getUsername(),
                         post.getImageUrl()))
                 .collect(Collectors.toList());
     }
@@ -155,7 +156,7 @@ public class PostService {
         if (images != null && !images.isEmpty()) {
             for (MultipartFile image : images) {
                 String imageUrl = saveImage(image);  // Implement saveImage method
-                post.setImageUrl(imageUrl);  // Assuming the post has only one image
+                post.setImageUrl(imageUrl); 
                 break; // If you want multiple images, handle this differently
             }
         }
@@ -168,6 +169,25 @@ public class PostService {
     private String saveImage(MultipartFile image) {
         String imageUrl = "/uploads/" + UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
         return imageUrl;
+    }
+
+    // Method to find a post by its ID and return it as a PostDTO
+    public PostDTO findPostById(Long postId) {
+        // Fetch the post directly by ID
+        return postRepository.findById(postId)
+                .map(post -> new PostDTO(
+                        post.getId(),
+                        post.getCommunity().getName(), // Assuming Post has a Community object
+                        post.getCommunity().getLogoUrl(),
+                        post.getCreatedAt().toString(),
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getVotes(),
+                        post.getComments().size(),
+                        post.getUser().getUsername(),
+                        post.getImageUrl()
+                ))
+                .orElse(null); // If post is not found, return null
     }
 
 }

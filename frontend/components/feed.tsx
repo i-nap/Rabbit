@@ -16,6 +16,7 @@ interface Post {
   content: string;
   votes: number;
   comments: number;
+  username: string;
   imageUrl?: string;
 }
 
@@ -64,7 +65,8 @@ export default function Feed() {
     const fetchPosts = async () => {
       try {
         const response = await axios.get("http://localhost:8080/api/posts/getposts");
-        setPosts(response.data); // Axios automatically parses JSON
+        setPosts(response.data);
+        console.log(response.data)
       } catch (err) {
         console.error("Error fetching posts:", err);
       }
@@ -114,6 +116,7 @@ export default function Feed() {
             votes={post.votes}
             comments={post.comments}
             imageUrl={post.imageUrl}
+            username={post.username}
           />
         ))}
       </div>

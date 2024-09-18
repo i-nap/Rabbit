@@ -18,6 +18,7 @@ public class PostDTO {
     private String content;
     private int votes;
     private int comments;
+    private String username;
     private String imageUrl;
 
 }

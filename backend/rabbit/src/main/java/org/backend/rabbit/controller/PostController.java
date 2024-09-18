@@ -2,6 +2,7 @@ package org.backend.rabbit.controller;
 
 import org.backend.rabbit.dto.PostCreationDTO;
 import org.backend.rabbit.dto.PostDTO;
+import org.backend.rabbit.model.Post;
 import org.backend.rabbit.services.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,16 @@ public class PostController {
     @GetMapping("/getposts")
     public List<PostDTO> getAllPosts() {
         return postService.getAllPosts();
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostDTO> getPostById(@PathVariable Long postId) {
+        // Fetch the post from the service layer using postId
+        PostDTO postDto = postService.findPostById(postId);
+        if (postDto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(postDto);
     }
 
     @GetMapping("/createDummyPosts")

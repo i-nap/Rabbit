@@ -10,6 +10,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginResponseDTO {
+
     private String token;
     private String username;
     private String email;

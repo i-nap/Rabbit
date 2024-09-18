@@ -1,5 +1,6 @@
 package org.backend.rabbit.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,7 @@ public class Post {
     private Community community;  // Post belongs to a Community
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference  // This will be serialized
     private List<Comment> comments;
 
     @Column(nullable = false)
