@@ -12,5 +12,5 @@ public class PostCreationDTO {
     private String title;
     private String body;
     private String links;
-
+    private Long userId;
 }

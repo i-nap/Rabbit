@@ -66,10 +66,11 @@ public class AuthController {
             // Prepare user information
             String username = user.getUsername();
             String profilePicture = user.getProfilePictureUrl();  // Assuming user has a profile picture URL field
-
+            String userId = user.getId().toString();
             // Return the token and user info in the response
             LoginResponseDTO response = new LoginResponseDTO(
                     token,
+                    userId,
                     username,
                     user.getEmail(),
                     profilePicture,

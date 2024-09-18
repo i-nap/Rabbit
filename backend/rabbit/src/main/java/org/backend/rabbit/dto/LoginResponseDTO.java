@@ -12,6 +12,7 @@ import java.time.Instant;
 public class LoginResponseDTO {
 
     private String token;
+    private String userId;
     private String username;
     private String email;
     private String profilePicture;

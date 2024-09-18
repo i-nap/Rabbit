@@ -1,10 +1,14 @@
 'use client';
 
-import React, { useState } from "react";
-import Image from "next/image";
-import { ArrowDown, ArrowUp, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { ArrowDown, ArrowUp, MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/store/store'; // Adjust path to your store configuration
+import { useToast } from '@/hooks/use-toast'; // Assuming you're using a custom toast hook
 
 interface FeedPostProps {
   id: number;
@@ -16,8 +20,7 @@ interface FeedPostProps {
   votes: number;
   comments: number;
   imageUrl?: string;
-  userId: number;
-  username: string; // Assuming you have userId available for voting
+  username: string;
 }
 
 const FeedPost: React.FC<FeedPostProps> = ({
@@ -30,32 +33,78 @@ const FeedPost: React.FC<FeedPostProps> = ({
   votes,
   comments,
   imageUrl,
-  userId,
   username,
 }) => {
-  // State for tracking upvote, downvote, and vote count
+  const { toast } = useToast(); // Use toast to show a message
   const [upClicked, setUpClicked] = useState(false);
   const [downClicked, setDownClicked] = useState(false);
   const [voteCount, setVoteCount] = useState(votes);
 
+  // Get the logged-in userId from Redux store (userSlice)
+  const userId = useSelector((state: RootState) => state.user.userInfo?.userId);
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn); // To detect login/logout
+
+  // Reset voting state on logout
+  useEffect(() => {
+    if (!isLoggedIn) {
+      // Reset vote state when user logs out
+      setUpClicked(false);
+      setDownClicked(false);
+    }
+  }, [isLoggedIn]);
+
+  // Fetch vote status when the component mounts
+  useEffect(() => {
+    const fetchVoteStatus = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/posts/${id}/vote-status`, {
+          params: { userId }, // Use userId from Redux
+        });
+
+        const { voteStatus } = response.data;
+
+        // Update the UI based on the vote status
+        if (voteStatus === 'upvote') {
+          setUpClicked(true);
+          setDownClicked(false);
+        } else if (voteStatus === 'downvote') {
+          setDownClicked(true);
+          setUpClicked(false);
+        } else {
+          setUpClicked(false);
+          setDownClicked(false);
+        }
+      } catch (error) {
+        console.error('Error fetching vote status:', error);
+      }
+    };
+
+    if (userId) {
+      fetchVoteStatus();
+    }
+  }, [id, userId]);
+
   // Handle vote logic and backend call
   const handleVote = async (isUpvote: boolean) => {
+    if (!userId) {
+      // Show toast if the user is not logged in
+      toast({
+        title: "Login required",
+        description: "You need to log in to vote.",
+      });
+      return;
+    }
+
     try {
-      const response = await fetch(`http://localhost:8080/api/posts/${id}/vote`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, isUpvote }),
+      const response = await axios.post(`http://localhost:8080/api/posts/${id}/vote`, {
+        userId, // Use userId from Redux
+        isUpvote,
       });
 
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to register vote");
-      }
+      const { newVoteCount } = response.data;
 
       // Update vote count based on backend response
-      setVoteCount(result.newVoteCount);
+      setVoteCount(newVoteCount);
 
       // Toggle upvote or downvote states
       if (isUpvote) {
@@ -66,7 +115,7 @@ const FeedPost: React.FC<FeedPostProps> = ({
         setUpClicked(false); // Reset upvote if downvote is clicked
       }
     } catch (error) {
-      console.error("Error voting:", error);
+      console.error('Error voting:', error);
     }
   };
 
@@ -87,7 +136,7 @@ const FeedPost: React.FC<FeedPostProps> = ({
           />
         </div>
         <span className="font-bold text-sm">b/{community}</span>
-        <span className="font-bold text-sm">{username}</span>
+        <span className="font-bold text-sm ml-2">{username}</span>
         <span className="text-xs text-subtext ml-2">{time}</span>
       </div>
 
@@ -103,7 +152,7 @@ const FeedPost: React.FC<FeedPostProps> = ({
               src={imageUrl}
               alt={title}
               fill
-              style={{ objectFit: "contain" }}
+              style={{ objectFit: 'contain' }}
               className="absolute inset-0"
             />
           </div>
@@ -116,7 +165,7 @@ const FeedPost: React.FC<FeedPostProps> = ({
         <div className="flex font-medium font-head text-[20px] justify-center items-center">
           <ArrowUp
             className={`cursor-pointer transition-all duration-200 ease-in-out ${
-              upClicked ? "text-green-500" : "hover:text-gray-500"
+              upClicked ? 'text-green-500' : 'hover:text-gray-500'
             }`}
             onClick={handleUpClick}
             aria-label="Upvote"
@@ -124,7 +173,7 @@ const FeedPost: React.FC<FeedPostProps> = ({
           <span className="ml-2 mr-2">{voteCount}</span>
           <ArrowDown
             className={`cursor-pointer transition-all duration-200 ease-in-out ${
-              downClicked ? "text-red-500" : "hover:text-gray-500"
+              downClicked ? 'text-red-500' : 'hover:text-gray-500'
             }`}
             onClick={handleDownClick}
             aria-label="Downvote"

@@ -35,11 +35,11 @@ public class PostController {
         return ResponseEntity.ok(postDto);
     }
 
-    @GetMapping("/createDummyPosts")
-    public String createDummyPosts() {
-        postService.createDummyPosts();
-        return "Dummy posts created successfully!";
-    }
+//    @GetMapping("/createDummyPosts")
+//    public String createDummyPosts() {
+//        postService.createDummyPosts();
+//        return "Dummy posts created successfully!";
+//    }
 
     @PostMapping("/create")
     public ResponseEntity<Map<String, String>> createPost(

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // Import axios
+import axios from "axios";
 import FeedPost from "./ui/post";
 import { Separator } from "@/components/ui/separator";
 import { ComboBoxResponsive } from "./ui/combobox";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 
 interface Post {
   id: number;
-  community: string; // If the backend sends 'community' as a string instead of an object
+  community: string;
   communityImage: string;
   time: string;
   title: string;
@@ -66,7 +66,7 @@ export default function Feed() {
       try {
         const response = await axios.get("http://localhost:8080/api/posts/getposts");
         setPosts(response.data);
-        console.log(response.data)
+        console.log(response.data);
       } catch (err) {
         console.error("Error fetching posts:", err);
       }
@@ -93,7 +93,7 @@ export default function Feed() {
               initialSelection="All"
               widthMobile="100px"
               showImages={false}
-              onSelectionChange={handleSelectionChange} // Now passing the handler
+              onSelectionChange={handleSelectionChange}
             />
             <CreatePostDialog />
           </div>
@@ -106,7 +106,6 @@ export default function Feed() {
         {posts.map((post) => (
           <FeedPost
             key={post.id}
-            userId={2}
             id={post.id}
             community={post.community}
             communityImage={post.communityImage}

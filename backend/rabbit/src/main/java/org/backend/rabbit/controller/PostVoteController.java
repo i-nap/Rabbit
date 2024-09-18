@@ -20,11 +20,23 @@ public class PostVoteController {
     @Autowired
     private PostService postService;
 
+    // New endpoint to get the user's vote status for a post
+    @GetMapping("/{postId}/vote-status")
+    public ResponseEntity<Map<String, Object>> getVoteStatus(
+            @PathVariable Long postId,
+            @RequestParam Long userId) {
+        String voteStatus = postService.getUserVoteStatus(postId, userId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("voteStatus", voteStatus);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{postId}/vote")
     public ResponseEntity<Map<String, Object>> voteOnPost(
             @PathVariable Long postId,
             @RequestBody String rawJson) throws JsonProcessingException {
-//        System.out.println("Received raw JSON: " + rawJson); // Log the raw JSON
         ObjectMapper mapper = new ObjectMapper();
 
         // Deserialize the raw JSON to DTO

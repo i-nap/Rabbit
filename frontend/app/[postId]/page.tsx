@@ -60,7 +60,6 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
                 <div className="pt-32 w-[64%] ml-[18%] mr-[18%] p-[3rem] overflow-y-auto hide-scrollbar">
                     {/* Render the post details */}
                     <FeedPost
-                        userId={2} // Replace with actual user ID
                         id={post.id}
                         community={post.community}
                         communityImage={post.communityImage}

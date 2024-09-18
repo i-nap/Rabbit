@@ -48,29 +48,27 @@ public class PostService {
                         post.getVotes(),
                         post.getComments().size(),
                         post.getUser().getUsername(),
-                        post.getImageUrl()))
+                        post.getImageUrl(),
+                        post.getUser().getId()))
                 .collect(Collectors.toList());
     }
     public int voteOnPost(Long postId, Long userId, boolean isUpvote) {
-        // Fetch user and post entities
+        // Fetch the post and user entities
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
         // Check if the user has already voted on this post
         Optional<PostVote> existingVoteOpt = postVoteRepository.findByPostAndUser(post, user);
 
-        // If a vote already exists
         if (existingVoteOpt.isPresent()) {
             PostVote existingVote = existingVoteOpt.get();
-
             if (existingVote.isUpvote() == isUpvote) {
-                // User is toggling the same vote (remove the vote)
+                // The user is toggling the same vote (remove the vote)
                 postVoteRepository.delete(existingVote);
                 if (isUpvote) {
-                    post.setVotes(Math.max(0, post.getVotes() - 1)); // Remove the upvote
+                    post.setVotes(Math.max(0, post.getVotes() - 1)); // Remove upvote
                 } else {
-                    // When removing a downvote, don't increase the vote count
-                    // Simply allow the vote to remain unchanged
+                    post.setVotes(post.getVotes() + 1); // Remove downvote
                 }
             } else {
                 // User is switching votes (upvote to downvote or vice versa)
@@ -92,7 +90,7 @@ public class PostService {
             if (isUpvote) {
                 post.setVotes(post.getVotes() + 1); // First-time upvote
             } else {
-                post.setVotes(Math.max(0, post.getVotes() - 1)); // First-time downvote, ensuring no negative vote count
+                post.setVotes(Math.max(0, post.getVotes() - 1)); // First-time downvote
             }
         }
 
@@ -138,9 +136,9 @@ public class PostService {
         // Find the community by ID or name
         Community community = communityRepository.findByName(postDto.getCommunity())
                 .orElseThrow(() -> new IllegalArgumentException("Community not found"));
-
-        // Assume user ID is passed in the DTO (or get it from the session)
-        User user = userRepository.findById(2L)  // Replace with dynamic user ID fetching logic
+        System.out.println(postDto.getUserId());
+        // Find the user by ID from the postDto
+        User user = userRepository.findById(postDto.getUserId())  // Fetch user based on the passed userId
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // Create the post
@@ -156,7 +154,7 @@ public class PostService {
         if (images != null && !images.isEmpty()) {
             for (MultipartFile image : images) {
                 String imageUrl = saveImage(image);  // Implement saveImage method
-                post.setImageUrl(imageUrl); 
+                post.setImageUrl(imageUrl);
                 break; // If you want multiple images, handle this differently
             }
         }
@@ -185,9 +183,20 @@ public class PostService {
                         post.getVotes(),
                         post.getComments().size(),
                         post.getUser().getUsername(),
-                        post.getImageUrl()
-                ))
+                        post.getImageUrl(),
+                        post.getUser().getId()))
                 .orElse(null); // If post is not found, return null
+    }
+
+    public String getUserVoteStatus(Long postId, Long userId) {
+        PostVote vote = postVoteRepository.findByPostIdAndUserId(postId, userId);
+        if (vote == null) {
+            return "none";  // No vote found
+        } else if (vote.isUpvote()) {
+            return "upvote";
+        } else {
+            return "downvote";
+        }
     }
 
 }

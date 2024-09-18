@@ -5,7 +5,7 @@ interface UserState {
   token: string | null;
   tokenExpiration: number | null; // Store the expiration time as a timestamp
   userInfo: {
-    id: number;
+    userId: number;
     username: string;
     profilePicture?: string;
     firstName: string;

@@ -17,7 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "../../hooks/use-toast";
 import axios from "axios";
-
+import { useSelector } from "react-redux"; // Import the useSelector hook
+import { RootState } from "@/app/store/store"; // Adjust the path to your store configuration
 
 const optionsCommunity = [
   {
@@ -35,11 +36,15 @@ const optionsCommunity = [
 export default function CreatePostDialog() {
   const { toast } = useToast(); // Use the toast hook
 
+  const [open, setOpen] = useState(false); // Control the dialog's visibility
   const [community, setCommunity] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [links, setLinks] = useState("");
   const [images, setImages] = useState<File[]>([]);
+
+  // Retrieve the user info from the Redux store
+  const userId = useSelector((state: RootState) => state.user.userInfo?.userId);
 
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -47,70 +52,92 @@ export default function CreatePostDialog() {
     }
   };
 
- // Assuming you're using a toast utility
-  
+  const handleCreateClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!userId) {
+      e.preventDefault(); // Prevent the dialog from opening
+      toast({
+        title: "Not Logged In",
+        description: "You need to be logged in to create a post.",
+      });
+    } else {
+      setOpen(true); // Open the dialog if the user is logged in
+    }
+  };
+
   const handleSubmit = async () => {
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "You need to be logged in to create a post.",
+      });
+      return;
+    }
+
     const formData = new FormData();
     formData.append(
       "post",
       new Blob(
-        [JSON.stringify({
-          community,
-          title,
-          body,
-          links,
-        })],
-        { type: 'application/json' } // Ensures correct content type for JSON
+        [
+          JSON.stringify({
+            community,
+            title,
+            body,
+            links,
+            userId, // Include the userId from Redux
+          }),
+        ],
+        { type: "application/json" } // Ensures correct content type for JSON
       )
     );
-  
+
     images.forEach((image) => formData.append("images", image));
-  
+
     try {
-      const response = await axios.post("http://localhost:8080/api/posts/create", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
-      // Handle JSON or text response depending on server response
+      const response = await axios.post(
+        "http://localhost:8080/api/posts/create",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       if (response.data) {
         const result = response.data; // Axios automatically parses JSON
         console.log(result.message);
-  
+
         // Show success toast
         toast({
           title: "Post Created Successfully!",
           description: `Your post in the ${community} community was created successfully.`,
-    
         });
+
+        // Close the dialog after successful post creation
+        setOpen(false);
       } else {
-        // Show success toast for non-JSON responses
         console.log(response);
         toast({
           title: "Post Created Successfully!",
           description: "Your post was created successfully.",
-
         });
+        setOpen(false);
       }
-  
     } catch (error) {
       console.error("Error creating post:", error);
-  
+
       // Show error toast
       toast({
         title: "Error",
         description: "An error occurred while creating the post.",
-
       });
     }
   };
-  
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="ml-6">
+        <Button className="ml-6" onClick={handleCreateClick}>
           <CirclePlus className="h-4 w-4" /> <span className="ml-1">Create</span>
         </Button>
       </DialogTrigger>

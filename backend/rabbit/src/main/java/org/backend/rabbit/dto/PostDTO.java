@@ -20,5 +20,6 @@ public class PostDTO {
     private int comments;
     private String username;
     private String imageUrl;
+    private Long userId; // Add this field
 
 }

@@ -46,8 +46,8 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onOpenChange }) => {
       });
 
       if (response.status === 200) {
-        const { token, username, email, profilePicture,firstName,lastName,createdAt,tokenExpiration } = response.data;
-        const userInfo = { username, email, profilePicture, firstName, lastName, createdAt};
+        const { token, userId,username, email, profilePicture,firstName,lastName,createdAt,tokenExpiration } = response.data;
+        const userInfo = { userId,username, email, profilePicture, firstName, lastName, createdAt};
         const expirationDate = new Date(tokenExpiration).getTime();  // Convert to timestamp if needed
 
         // Store the JWT token in localStorage
