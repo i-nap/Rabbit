@@ -18,5 +18,5 @@ public class CommunityDTO {
     private String links;
     private String logoUrl;
     private String coverImageUrl;
-
+    private Long userId;
 }

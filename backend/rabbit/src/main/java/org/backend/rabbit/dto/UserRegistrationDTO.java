@@ -12,4 +12,5 @@ public class UserRegistrationDTO {
     private String email;
     private String password;
     private String profilePictureUrl;
+    private boolean isOAuth;
 }

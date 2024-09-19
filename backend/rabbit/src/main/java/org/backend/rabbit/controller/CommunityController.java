@@ -1,6 +1,7 @@
 package org.backend.rabbit.controller;
 
 import org.backend.rabbit.dto.CommunityDTO;
+import org.backend.rabbit.model.Community;
 import org.backend.rabbit.services.CommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,9 @@ public class CommunityController {
             @RequestParam("tags") List<String> tags,
             @RequestParam("links") String links,
             @RequestParam(value = "logo", required = false) MultipartFile logo,
-            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage) {
+            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
+            @RequestParam("userId") Long userId // Accept userId as a request parameter
+    ) {
 
         Map<String, String> response = new HashMap<>();
 
@@ -36,6 +39,7 @@ public class CommunityController {
             communityDto.setDescription(description != null ? description : "");
             communityDto.setTags(tags);
             communityDto.setLinks(links);
+            communityDto.setUserId(userId); // Set the userId
 
             // Handle optional logo file
             if (logo != null && !logo.isEmpty()) {
@@ -71,14 +75,20 @@ public class CommunityController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    @PostMapping("/{communityId}/join")
-    public ResponseEntity<Map<String, String>> joinCommunity(
-            @PathVariable Long communityId,
-            @RequestParam("userId") Long userId) {
 
+    @GetMapping("/user/{userId}/createdCommunities")
+    public ResponseEntity<List<Community>> getUserCreatedCommunities(@PathVariable Long userId) {
+        List<Community> communities = communityService.getCommunitiesByUserId(userId);
+        return ResponseEntity.ok(communities);
+    }
+
+    @PostMapping("/{communityName}/join")
+    public ResponseEntity<Map<String, String>> joinCommunity(
+            @PathVariable String communityName,
+            @RequestParam("userId") Long userId) {
         Map<String, String> response = new HashMap<>();
         try {
-            communityService.subscribeToCommunity(userId, communityId);
+            communityService.subscribeToCommunity(userId, communityName);
             response.put("message", "Joined the community successfully");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -88,20 +98,30 @@ public class CommunityController {
     }
 
     // Endpoint to leave a community
-    @PostMapping("/{communityId}/leave")
+    @PostMapping("/{communityName}/leave")
     public ResponseEntity<Map<String, String>> leaveCommunity(
-            @PathVariable Long communityId,
+            @PathVariable String communityName,
             @RequestParam("userId") Long userId) {
 
         Map<String, String> response = new HashMap<>();
         try {
-            communityService.unsubscribeFromCommunity(userId, communityId);
+            communityService.unsubscribeFromCommunity(userId, communityName);
             response.put("message", "Left the community successfully");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("message", "Error leaving community");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+    @GetMapping("/{communityName}/isJoined")
+    public ResponseEntity<Map<String, Boolean>> isJoined(
+            @PathVariable String communityName,
+            @RequestParam Long userId
+    ) {
+        boolean isJoined = communityService.isUserSubscribed(communityName, userId);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isJoined", isJoined);
+        return ResponseEntity.ok(response);
     }
 }
 

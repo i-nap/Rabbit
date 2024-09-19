@@ -2,14 +2,13 @@ package org.backend.rabbit.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.backend.rabbit.model.Community;
+import jakarta.transaction.Transactional;
 import org.backend.rabbit.model.Otp;
 import org.backend.rabbit.model.User;
 import org.backend.rabbit.repository.CommunityRepository;
 import org.backend.rabbit.repository.OtpRepository;
 import org.backend.rabbit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -41,7 +40,7 @@ public class UserService {
 
     private static final int OTP_LENGTH = 6;
 
-    public User registerUser(String fName, String lName, String username, String email, String password, String profilePictureUrl) {
+    public User registerUser(String fName, String lName, String username, String email, String password, String profilePictureUrl, boolean oAuth) {
         // Check if email or username already exists
         if (userRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("Username already exists.");
@@ -58,7 +57,8 @@ public class UserService {
                 .username(username)
                 .email(email)
                 .password(encodedPassword)
-                .profilePictureUrl(profilePictureUrl)  // Set profile picture URL
+                .profilePictureUrl(profilePictureUrl)
+                .isOAuth(false)// Set profile picture URL
                 .enabled(false)  // User is disabled until OTP verification
                 .build();
 
@@ -72,6 +72,23 @@ public class UserService {
 
     private void editProfile(User user){
 
+    }
+
+    public Optional<User> findLastUsernameWithPrefix(String prefix) {
+        // This method should query the database and return the last username that starts with 'user'
+        // For example:
+        return userRepository.findTopByUsernameStartingWithOrderByUsernameDesc(prefix);
+    }
+
+    // Check if the username already exists
+    public boolean usernameExists(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Transactional // Ensure the transaction is handled properly
+    public void saveUser(User user) {
+        System.out.println("Saving user: " + user);
+        userRepository.save(user);
     }
 
     private void sendOtp(User user) {
@@ -161,9 +178,10 @@ public class UserService {
         return false;
     }
 
+
+
     public User validateUser(String email, String rawPassword) {
         Optional<User> userOptional = userRepository.findByEmail(email);
-
         // Check if user exists and the raw password matches the stored encrypted password
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -174,5 +192,10 @@ public class UserService {
             }
         }
         return null;  // User not found or password doesn't match
+    }
+
+    public User findByEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.orElse(null);  // Return null if user not found, or handle the case as per your requirements
     }
 }

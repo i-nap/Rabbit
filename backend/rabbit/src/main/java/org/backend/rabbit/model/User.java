@@ -1,5 +1,6 @@
 package org.backend.rabbit.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,10 +21,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false, unique = true)
+    @Column(nullable=true, unique = true)
     private String username;
 
-    @Column(nullable=false)
+    @Column
     private String password;
 
     @Column(nullable=false)
@@ -57,10 +58,13 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "community_id")
     )
+    @JsonIgnore  // Prevents recursive serialization
     private List<Community> subscribedCommunities;
 
     @Column(nullable = true) // Nullable is true to make it optional
     private String profilePictureUrl;
 
+    @Column(nullable = false)
+    private boolean isOAuth; // New column to distinguish OAuth users
 }
 

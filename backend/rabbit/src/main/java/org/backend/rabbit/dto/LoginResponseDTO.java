@@ -19,6 +19,7 @@ public class LoginResponseDTO {
     private String firstName;
     private String lastName;
     private Instant onCreate;
-    private Instant tokenExpiration;  // Field for token expiration time
+    private Instant tokenExpiration;
+    // Field for token expiration time
 
 }

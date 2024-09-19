@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
+
 @Entity
 @Data
 @Builder
@@ -45,7 +46,13 @@ public class Community {
         this.createdAt = Instant.now();
     }
 
-    // New Many-to-Many relationship for community subscribers
+    // Many-to-One relationship for the user who creates the community
+    @ManyToOne(fetch = FetchType.LAZY) // LAZY fetching to optimize performance
+    @JoinColumn(name = "created_by", nullable = false) // Foreign key to User table
+    private User createdBy;
+
+    // Many-to-Many relationship for community subscribers
     @ManyToMany(mappedBy = "subscribedCommunities")
+
     private List<User> subscribers;
 }

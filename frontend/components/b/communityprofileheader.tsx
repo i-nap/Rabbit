@@ -1,27 +1,50 @@
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Star } from "lucide-react";
 import { Button } from "../ui/button";
 import CreatePostDialog from '../ui/createpostdialog';
 import { useToast } from "../../hooks/use-toast"; // Ensure correct path
 import axios from 'axios'; // Import axios
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/store/store";  // Import RootState from Redux store
 
 type CommunityProfileProps = {
   communityName: string;
   communityId: number;  // Add communityId prop to pass to the backend
-  userId: number;  // Assume you have user information available
 };
 
-export default function CommunityProfileHeader({ communityName, communityId, userId }: CommunityProfileProps) {
+export default function CommunityProfileHeader({ communityName, communityId }: CommunityProfileProps) {
   const [isJoined, setIsJoined] = useState(false); // Track join state
   const { toast } = useToast(); // Use the toast hook
+  const { isLoggedIn, userInfo } = useSelector((state: RootState) => state.user);
+
+  // Function to check if the user is already subscribed to the community
+  const fetchSubscriptionStatus = async () => {
+    if (userInfo?.userId) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/community/${communityName}/isJoined?userId=${userInfo.userId}`
+        );
+        setIsJoined(response.data.isJoined);  // Assuming the response contains `isJoined`
+      } catch (error) {
+        console.error("Error checking subscription status:", error);
+      }
+    }
+  };
+
+  // Fetch subscription status when the component mounts
+  useEffect(() => {
+    if (isLoggedIn && userInfo?.userId) {
+      fetchSubscriptionStatus();  // Check subscription status when user logs in
+    }
+  }, [isLoggedIn, userInfo]);
 
   const handleJoinToggle = async () => {
     try {
-      const response = await axios.post(`http://localhost:8080/api/community/${communityId}/${isJoined ? 'leave' : 'join'}`, {
-        userId: userId, // Send userId in the request body
-      });
+      const response = await axios.post(`http://localhost:8080/api/community/${communityName}/${isJoined ? 'leave' : 'join'}?userId=${userInfo?.userId}`);
+
+      console.log('Response:', response); // Debug the response
 
       if (response.status === 200) {
         setIsJoined(!isJoined); // Toggle join state
