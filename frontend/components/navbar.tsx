@@ -21,6 +21,7 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/app/store/store";  // Import RootState from Redux store
 import { logout } from "@/app/slices/userSlice";  // Import logout action
+import { signIn, signOut, useSession } from 'next-auth/react'; // Import NextAuth signIn, signOut, and useSession
 
 export function NavBar() {
   // Manage the state for the login dialog
@@ -33,13 +34,18 @@ export function NavBar() {
   
   const router = useRouter();
 
-  // Handle logout
-  const handleLogout = () => {
-    dispatch(logout());  // Dispatch logout action
-    localStorage.removeItem('jwt'); // Remove JWT token from localStorage
-    localStorage.removeItem('user'); // Remove user info from localStorage
-    router.push('/'); // Redirect to homepage after logout
-  };
+  // Handle logout with session removal
+const handleLogout = async () => {
+  dispatch(logout());  // Dispatch logout action
+
+  // Remove JWT token and user info from localStorage
+  localStorage.removeItem('jwt');
+  localStorage.removeItem('userInfo');
+  localStorage.removeItem('tokenExpiration');
+
+  // Sign out of the session using NextAuth.js
+  await signOut({ callbackUrl: '/' }); // Optional: Redirect to home page after sign-out
+};
 
   return (
     <div className="flex items-center w-full fixed justify-center p-2 z-[40] mt-[1rem] font-lato">
