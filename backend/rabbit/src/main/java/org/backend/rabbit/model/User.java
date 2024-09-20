@@ -52,13 +52,13 @@ public class User {
     private List<Otp> otps;
 
     // New Many-to-Many relationship for community subscriptions
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "user_community",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "community_id")
     )
-    @JsonIgnore  // Prevents recursive serialization
+    @JsonIgnore // Prevent infinite recursion when serializing User entities
     private List<Community> subscribedCommunities;
 
     @Column(nullable = true) // Nullable is true to make it optional

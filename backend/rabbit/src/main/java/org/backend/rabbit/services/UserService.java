@@ -118,6 +118,7 @@ public class UserService {
         }
     }
 
+
     private String buildHtmlOtpMessage(User user, String otp) {
         return "<html>" +
                 "<body>" +

@@ -202,8 +202,8 @@ export default function SideBarLeft() {
                 overflowY: 'auto'  // Allow scrolling if height exceeds the limit
               }}
             >
-              {userCommunities.map((community) => (
-                <Link key={community.id} href={`/b/${community.name}`}>
+              {userCommunities.map((community,index) => (
+                <Link key={`${community.id}-${index}`} href={`/b/${community.name}`}>
                   <InCommunities
                     communityName={community.name}
                     communityLogoUrl={community.logoUrl}
@@ -220,31 +220,31 @@ export default function SideBarLeft() {
       {/* Display In Communities only when logged in */}
       {isLoggedIn && (
         <>
-    <Separator className="my-[2rem]" />
-    <div className="flex flex-col pl-[1rem]">
-      <span className="font-lato text-[16px] text-subtext">In Communities:</span>
+          <Separator className="my-[2rem]" />
+          <div className="flex flex-col pl-[1rem]">
+            <span className="font-lato text-[16px] text-subtext">In Communities:</span>
 
-      <ScrollArea
-        className="mt-[1rem]"
-        style={{
-          maxHeight: '15rem',  // Maximum height of the scroll area
-          height: inCommunitiesRecent.length ? `${inCommunitiesRecent.length * 2}rem` : 'auto',  // Dynamic height based on number of communities
-          overflowY: 'auto'  // Enable scrolling if content exceeds the max height
-        }}
-      >
-        {inCommunitiesRecent.map((community) => (
-          <Link key={community.communityId} href={`/b/${community.communityName}`}>
-            <InCommunities
-              {...community}
-              communityName={community.communityName}
-              communityLogoUrl={community.communityImageUrl}
-              communityId={community.communityId}
-            />
-          </Link>
-        ))}
-      </ScrollArea>
-    </div>
-  </>
+            <ScrollArea
+              className="mt-[1rem]"
+              style={{
+                maxHeight: '15rem',  // Maximum height of the scroll area
+                height: inCommunitiesRecent.length ? `${inCommunitiesRecent.length * 2}rem` : 'auto',  // Dynamic height based on number of communities
+                overflowY: 'auto'  // Enable scrolling if content exceeds the max height
+              }}
+            >
+              {inCommunitiesRecent.map((community) => (
+                <Link key={community.communityId} href={`/b/${community.communityName}`}>
+                  <InCommunities
+                    {...community}
+                    communityName={community.communityName}
+                    communityLogoUrl={community.communityImageUrl}
+                    communityId={community.communityId}
+                  />
+                </Link>
+              ))}
+            </ScrollArea>
+          </div>
+        </>
       )}
     </div>
   );

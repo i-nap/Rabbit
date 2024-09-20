@@ -53,6 +53,5 @@ public class Community {
 
     // Many-to-Many relationship for community subscribers
     @ManyToMany(mappedBy = "subscribedCommunities")
-
     private List<User> subscribers;
 }

@@ -8,6 +8,7 @@ import org.backend.rabbit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,14 +40,16 @@ public class CommunityService {
         community.setTags(communityDto.getTags());
         community.setLinks(communityDto.getLinks());
         community.setCreatedBy(user); // Set the fetched User object
-
+        List<User> subscribers = new ArrayList<>();
+        subscribers.add(user);
+        community.setSubscribers(subscribers); // Set the subscribers list
         communityRepository.save(community);
     }
 
     public List<Community> getCommunitiesByUserId(Long userId) {
-        // Fetch communities created by the user
         return communityRepository.findByCreatedById(userId);
     }
+
 
     // Method to subscribe a user to a community
     public void subscribeToCommunity(Long userId, String communityName) {
@@ -100,4 +103,82 @@ public class CommunityService {
         // Return false if community or user is not found, or if the user is not subscribed
         return false;
     }
+
+    public boolean isUserCreator(String communityName, Long userId) {
+        Optional<Community> communityOptional = communityRepository.findByName(communityName);
+
+        // Check if the community exists
+        if (communityOptional.isPresent()) {
+            Community community = communityOptional.get(); // Get the actual community object
+
+            // Check if the creator's userId matches the provided userId
+            return community.getCreatedBy().getId().equals(userId);
+        }
+
+        // If the community is not found, return false
+        return false;
+    }
+
+    // Update Community Details
+    public void updateCommunity(CommunityDTO communityDto) throws IllegalArgumentException {
+        Optional<Community> existingCommunity = communityRepository.findByName(communityDto.getName());
+
+        if (existingCommunity.isEmpty()) {
+            throw new IllegalArgumentException("Community not found.");
+        }
+
+        Community community = existingCommunity.get();
+        community.setName(communityDto.getName());
+        community.setDescription(communityDto.getDescription());
+
+        if (communityDto.getLogoUrl() != null && !communityDto.getLogoUrl().isEmpty()) {
+            community.setLogoUrl(communityDto.getLogoUrl());
+        }
+        if (communityDto.getCoverImageUrl() != null && !communityDto.getCoverImageUrl().isEmpty()) {
+            community.setCoverImageUrl(communityDto.getCoverImageUrl());
+        }
+
+        communityRepository.save(community);
+    }
+
+    // Get Community Members
+    public List<User> getCommunityMembers(String communityName) throws IllegalArgumentException {
+        Community community = communityRepository.findByName(communityName)
+                .orElseThrow(() -> new IllegalArgumentException("Community not found."));
+
+        return community.getSubscribers();
+    }
+
+    public void removeMember(String communityName, Long memberId) {
+        Community community = communityRepository.findByName(communityName)
+                .orElseThrow(() -> new IllegalArgumentException("Community not found"));
+
+        User member = userRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        // Remove member from community's subscribers
+        boolean removedFromCommunity = community.getSubscribers().remove(member);
+
+        // Remove community from user's subscribed communities
+        boolean removedFromUser = member.getSubscribedCommunities().remove(community);
+
+        if (removedFromCommunity && removedFromUser) {
+            // Persist changes to both entities
+            communityRepository.save(community);
+            userRepository.save(member);
+        } else {
+            throw new IllegalArgumentException("Failed to remove user from community or user not subscribed");
+        }
+    }
+
+
+//    // Get Community Notifications
+//    public List<String> getCommunityNotifications(String communityName) throws IllegalArgumentException {
+//        Community community = communityRepository.findByName(communityName)
+//                .orElseThrow(() -> new IllegalArgumentException("Community not found."));
+//
+//        // Example: Assuming community has a list of notifications
+//        return community.getNotifications();
+//    }
+
 }

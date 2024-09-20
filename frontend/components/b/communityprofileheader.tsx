@@ -8,14 +8,16 @@ import { useToast } from "../../hooks/use-toast"; // Ensure correct path
 import axios from 'axios'; // Import axios
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";  // Import RootState from Redux store
+import Link from 'next/link';
 
 type CommunityProfileProps = {
   communityName: string;
-  communityId: number;  // Add communityId prop to pass to the backend
+  communityId: number;
 };
 
 export default function CommunityProfileHeader({ communityName, communityId }: CommunityProfileProps) {
   const [isJoined, setIsJoined] = useState(false); // Track join state
+  const [isCreator, setIsCreator] = useState(false); // Track if the user created the community
   const { toast } = useToast(); // Use the toast hook
   const { isLoggedIn, userInfo } = useSelector((state: RootState) => state.user);
 
@@ -33,18 +35,33 @@ export default function CommunityProfileHeader({ communityName, communityId }: C
     }
   };
 
-  // Fetch subscription status when the component mounts
+  // Function to check if the user is the creator of the community
+  const fetchCreatorStatus = async () => {
+    if (userInfo?.userId) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/community/${communityName}/isCreator?userId=${userInfo.userId}`
+        );
+        setIsCreator(response.data.isCreator); // Assuming the response contains `isCreator`
+      } catch (error) {
+        console.error("Error checking creator status:", error);
+      }
+    }
+  };
+
+  // Fetch subscription and creator status when the component mounts
   useEffect(() => {
     if (isLoggedIn && userInfo?.userId) {
       fetchSubscriptionStatus();  // Check subscription status when user logs in
+      fetchCreatorStatus(); // Check creator status when user logs in
     }
   }, [isLoggedIn, userInfo]);
 
   const handleJoinToggle = async () => {
     try {
-      const response = await axios.post(`http://localhost:8080/api/community/${communityName}/${isJoined ? 'leave' : 'join'}?userId=${userInfo?.userId}`);
-
-      console.log('Response:', response); // Debug the response
+      const response = await axios.post(
+        `http://localhost:8080/api/community/${communityName}/${isJoined ? 'leave' : 'join'}?userId=${userInfo?.userId}`
+      );
 
       if (response.status === 200) {
         setIsJoined(!isJoined); // Toggle join state
@@ -70,6 +87,27 @@ export default function CommunityProfileHeader({ communityName, communityId }: C
         title: "Error",
         description: "An error occurred while joining/leaving the community.",
       });
+    }
+  };
+
+  const handleDeleteCommunity = () => {
+    // Open a dialog box or confirm prompt to delete the community
+    if (confirm(`Are you sure you want to delete the ${communityName} community?`)) {
+      // Make a delete request to the backend
+      axios.delete(`http://localhost:8080/api/community/${communityName}?userId=${userInfo?.userId}`)
+        .then(() => {
+          toast({
+            title: "Community deleted",
+            description: `The ${communityName} community has been successfully deleted.`,
+          });
+        })
+        .catch(error => {
+          console.error(error);
+          toast({
+            title: "Error",
+            description: "An error occurred while deleting the community.",
+          });
+        });
     }
   };
 
@@ -121,14 +159,25 @@ export default function CommunityProfileHeader({ communityName, communityId }: C
             </div>
             <div className="flex space-x-4">
               <CreatePostDialog />
-              {/* Join/Leave Button */}
-              <Button
-                className=""
-                variant={isJoined ? "destructive" : "outline"}
-                onClick={handleJoinToggle}
-              >
-                <span>{isJoined ? "Leave" : "Join"}</span>
-              </Button>
+              {/* Conditionally render the delete or join/leave button */}
+              {isCreator ? (
+                <div className="flex space-x-4">
+                  <Button variant="destructive" onClick={handleDeleteCommunity}>
+                    <span>Delete Community</span>
+                  </Button>
+                  <Link href={`/b/${communityName}/edit`} passHref>
+              <Button variant={"outline"}>Edit Community</Button>
+                  </Link>
+                </div>
+
+              ) : (
+                <Button
+                  variant={isJoined ? "destructive" : "outline"}
+                  onClick={handleJoinToggle}
+                >
+                  <span>{isJoined ? "Leave" : "Join"}</span>
+                </Button>
+              )}
             </div>
           </div>
 
