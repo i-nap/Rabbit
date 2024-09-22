@@ -1,9 +1,13 @@
 // components/Search.js
 import { SearchIcon } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 const Search = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const router = useRouter();
 
   const handleFormClick = (event: React.MouseEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -14,6 +18,15 @@ const Search = () => {
     setIsOpen(false);
   };
 
+  const handleSearchSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    // Redirect to the search results page with the query
+    if (searchTerm.trim()) {
+      router.push(`/search?keyword=${encodeURIComponent(searchTerm)}`);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center">
       <form
@@ -22,9 +35,12 @@ const Search = () => {
         } h-12 bg-transparent rounded-full border-4 border-transparent flex items-center px-2`}
         onClick={handleFormClick}
         onMouseLeave={handleMouseLeave}
+        onSubmit={handleSearchSubmit}
       >
         <input
           type="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search here ..."
           className={`bg-white absolute top-0 left-0 h-full w-full px-4 py-2 outline-none border-0 rounded-full text-lg ${
             isOpen ? 'block' : 'hidden'

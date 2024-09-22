@@ -1,8 +1,12 @@
+'use client'
 import CommunityProfileFeed from "@/components/b/communityprofilefeed";
 import CommunityProfileHeader from "@/components/b/communityprofileheader";
 import Feed from "@/components/feed";
 import SideBarLeft from "@/components/sidebar-left";
 import SideBarRight from "@/components/sidebar-right";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter, useParams,usePathname } from 'next/navigation';
 
 export default function CommunityPage({
   params,
@@ -10,6 +14,7 @@ export default function CommunityPage({
   params: { communityName: string };
 }) {
   const { communityName } = params;
+  const router = useRouter(); // useRouter hook to get the router object
 
   // Fetch the community data based on the communityName
   const communityData = {
@@ -25,7 +30,18 @@ export default function CommunityPage({
           <SideBarLeft />
         </div>
         <div className="pt-32 w-[75%] ml-[18%] pl-[3rem] h-full overflow-y-auto hide-scrollbar space-y-[2rem]">
-            <CommunityProfileHeader communityName={communityName} />
+          {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => {
+          
+              router.back();
+          }}
+          className="flex items-center px-0"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+            <CommunityProfileHeader communityName={communityName} showButtons={true}/>
             <CommunityProfileFeed/>
         </div>
       </div>

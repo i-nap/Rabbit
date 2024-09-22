@@ -1,4 +1,5 @@
 'use client';
+import { useState } from "react";
 
 import * as React from "react";
 import Link from "next/link";
@@ -16,36 +17,47 @@ import {
 import { NavigationMenu, NavigationMenuList } from "@/components/ui/navigation-menu";
 import Search from "@/components/ui/search";
 import LoginDialog from "./ui/logindialog";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/app/store/store";  // Import RootState from Redux store
 import { logout } from "@/app/slices/userSlice";  // Import logout action
 import { signIn, signOut, useSession } from 'next-auth/react'; // Import NextAuth signIn, signOut, and useSession
+import Image from "next/image";
 
 export function NavBar() {
+  const searchParams = useSearchParams();
+
   // Manage the state for the login dialog
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+// Check for login query parameter and open dialog if login=true
+React.useEffect(() => {
+  if (searchParams.get('login') === 'true') {
+    setIsDialogOpen(true);  // Open the login dialog if the login parameter is present
+  }
+}, [searchParams]);
+  const handleSearchResults = (results: any[]) => {
+    setSearchResults(results);
+  };
   // Use Redux to manage user login state
   const { isLoggedIn, userInfo } = useSelector((state: RootState) => state.user);
   console.log(userInfo);
   const dispatch = useDispatch();
-  
+
   const router = useRouter();
 
   // Handle logout with session removal
-const handleLogout = async () => {
-  dispatch(logout());  // Dispatch logout action
+  const handleLogout = async () => {
+    dispatch(logout());  // Dispatch logout action
 
-  // Remove JWT token and user info from localStorage
-  localStorage.removeItem('jwt');
-  localStorage.removeItem('userInfo');
-  localStorage.removeItem('tokenExpiration');
+    // Remove JWT token and user info from localStorage
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('userInfo');
+    localStorage.removeItem('tokenExpiration');
 
-  // Sign out of the session using NextAuth.js
-  await signOut({ callbackUrl: '/' }); // Optional: Redirect to home page after sign-out
-};
+    // Sign out of the session using NextAuth.js
+    await signOut({ callbackUrl: '/' }); // Optional: Redirect to home page after sign-out
+  };
 
   return (
     <div className="flex items-center w-full fixed justify-center p-2 z-[40] mt-[1rem] font-lato">
@@ -53,8 +65,9 @@ const handleLogout = async () => {
         {/* Navigation Menu (Desktop) */}
         <NavigationMenu>
           <NavigationMenuList className="max-[825px]:hidden">
-            <Link href="/" className="pl-2">
-              <h1 className="font-bold">Rabbit.</h1>
+            <Link href="/" className="pl-2 flex items-end space-x-1">
+              <Image src="/logo.svg" alt="Rabbit Logo" width={48} height={48} />
+              <span className="font-head text-lg">Rabbit.</span>
             </Link>
           </NavigationMenuList>
         </NavigationMenu>
@@ -66,11 +79,11 @@ const handleLogout = async () => {
           </Link>
 
           {/* Show notification icon only when logged in */}
-          {isLoggedIn && (
-            <Link href="/automation">
-              <Bell className="hover:text-gray-500 transition-all duration-200 ease-in-out" />
-            </Link>
-          )}
+          {/* {isLoggedIn && ( */}
+            {/* // <Link href="/automation">
+            //   <Bell className="hover:text-gray-500 transition-all duration-200 ease-in-out" />
+            // </Link> */}
+          {/* )} */}
 
           {/* Account Dropdown */}
           <DropdownMenu>

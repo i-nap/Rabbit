@@ -3,6 +3,7 @@ package org.backend.rabbit.services;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
+import org.backend.rabbit.dto.ProfileUpdateDTO;
 import org.backend.rabbit.model.Otp;
 import org.backend.rabbit.model.User;
 import org.backend.rabbit.repository.CommunityRepository;
@@ -14,10 +15,16 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -36,6 +43,8 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    private final String uploadDirectory = "C:/uploads/profile-pictures/";  // Choose a permanent directory
 
 
     private static final int OTP_LENGTH = 6;
@@ -116,6 +125,61 @@ public class UserService {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+    }
+
+    public User updateUserProfile(Long userId, ProfileUpdateDTO profileUpdateDTO) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Update user fields (only if not null)
+        if (profileUpdateDTO.getFirstName() != null && !profileUpdateDTO.getFirstName().isEmpty()) {
+            user.setFirstName(profileUpdateDTO.getFirstName());
+        }
+        if (profileUpdateDTO.getLastName() != null && !profileUpdateDTO.getLastName().isEmpty()) {
+            user.setLastName(profileUpdateDTO.getLastName());
+        }
+        if (profileUpdateDTO.getUsername() != null && !profileUpdateDTO.getUsername().isEmpty()) {
+            user.setUsername(profileUpdateDTO.getUsername());
+        }
+        if (profileUpdateDTO.getPassword() != null && !profileUpdateDTO.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(profileUpdateDTO.getPassword())); // Make sure to encode password
+        }
+
+        // Save profile picture (if uploaded)
+        if (profileUpdateDTO.getProfilePicture() != null && !profileUpdateDTO.getProfilePicture().isEmpty()) {
+            String pictureUrl = saveProfilePicture(profileUpdateDTO.getProfilePicture()); // Method that saves the picture
+            user.setProfilePictureUrl(pictureUrl);
+        }
+
+        // Save the updated user
+        return userRepository.save(user);
+    }
+
+
+    private String saveProfilePicture(MultipartFile file) throws IOException {
+        // Generate a unique file name using UUID
+        String fileExtension = getFileExtension(file.getOriginalFilename());
+        String fileName = UUID.randomUUID().toString() + "." + fileExtension;
+
+        // Create the directory if it doesn't exist
+        Path uploadPath = Paths.get(uploadDirectory);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath); // Create the directory
+        }
+
+        // Save the file locally
+        Path filePath = uploadPath.resolve(fileName);
+        file.transferTo(filePath.toFile());
+
+        // Return the relative URL for saving in the database
+        return "http://localhost:8080"+"/uploads/profile-pictures/" + fileName;
+    }
+
+    private String getFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return "jpg"; // Default extension if none is found
+        }
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 
 

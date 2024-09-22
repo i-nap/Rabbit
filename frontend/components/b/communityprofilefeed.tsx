@@ -1,40 +1,49 @@
-
-import FeedPost from "../ui/post"; 
-
-const posts = [
-    {
-      id: 1,
-      subreddit: "reactjs",
-      subredditImage: "https://picsum.photos/id/24/367/267",
-      time: "1 hour ago",
-      title: "How to use useState hook?",
-      content: "I'm having trouble using the useState hook in React...",
-      votes: 100,
-      comments: 50,
-    },
-    {
-      id: 2,
-      subreddit: "javascript",
-      subredditImage: "https://picsum.photos/id/24/367/267",
-      time: "2 hours ago",
-      title: "Understanding closures",
-      content: "Can someone explain closures in JavaScript?",
-      votes: 200,
-      comments: 80,
-      imageUrl: "https://picsum.photos/id/26/367/267",
-    },
-  ];
+'use client'
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import FeedPost from "../ui/post";
+import { useParams } from 'next/navigation'; // To get the communityName from the URL
 
 export default function CommunityProfileFeed() {
+  const [posts, setPosts] = useState<any[]>([]); // State to store fetched posts
+  const { communityName } = useParams(); // Get community name from the URL
+  const [loading, setLoading] = useState<boolean>(true); // To show a loading state
 
-    return (
-        <>
-        {/* Posts Section */}
+  // Fetch posts from the backend using communityName
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/posts/${communityName}/posts`);
+      setPosts(response.data); // Assuming the API returns an array of posts
+    } catch (error) {
+      console.error("Failed to fetch posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch posts when the component mounts or when communityName changes
+  useEffect(() => {
+    if (communityName) {
+      fetchPosts();
+    }
+  }, [communityName]);
+
+  if (loading) {
+    return <div>Loading posts...</div>; // Show a loading state
+  }
+
+  if (posts.length === 0) {
+    return <div>No posts found for this community.</div>; // Show a message if no posts are found
+  }
+
+  return (
+    <>
+      {/* Posts Section */}
       <div className="">
         {posts.map((post) => (
           <FeedPost key={post.id} {...post} />
         ))}
       </div>
-        </>
-    )
+    </>
+  );
 }

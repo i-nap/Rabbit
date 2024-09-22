@@ -7,6 +7,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import org.backend.rabbit.dto.*;
 import org.backend.rabbit.model.User;
 import org.backend.rabbit.repository.UserRepository;
+import org.backend.rabbit.services.AuthService;
 import org.backend.rabbit.services.UserService;
 import org.backend.rabbit.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    @Autowired
+    private AuthService authService;
 
     @Autowired
     private UserService userService;
@@ -209,5 +212,23 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         return ResponseEntity.ok("Logged out successfully.");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest passwordChangeRequest) {
+        try {
+            boolean isPasswordChanged = authService.changePassword(
+                    passwordChangeRequest.getEmail(),
+                    passwordChangeRequest.getCurrentPassword(),
+                    passwordChangeRequest.getNewPassword());
+
+            if (isPasswordChanged) {
+                return ResponseEntity.ok("Password changed successfully");
+            } else {
+                return ResponseEntity.badRequest().body("Current password is incorrect");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
+        }
     }
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -52,6 +53,6 @@ public class Community {
     private User createdBy;
 
     // Many-to-Many relationship for community subscribers
-    @ManyToMany(mappedBy = "subscribedCommunities")
-    private List<User> subscribers;
+    @ManyToMany(mappedBy = "subscribedCommunities" ,cascade = CascadeType.PERSIST)
+    private List<User> subscribers = new ArrayList<>();
 }

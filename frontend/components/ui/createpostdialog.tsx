@@ -1,6 +1,4 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ComboBoxResponsive } from "./combobox";
 import { Button } from "@/components/ui/button";
 import { CirclePlus } from "lucide-react";
@@ -20,18 +18,17 @@ import axios from "axios";
 import { useSelector } from "react-redux"; // Import the useSelector hook
 import { RootState } from "@/app/store/store"; // Adjust the path to your store configuration
 
-const optionsCommunity = [
-  {
-    value: "Reddit",
-    label: "Reddit",
-    image: "https://picsum.photos/id/24/367/267",
-  },
-  {
-    value: "option2",
-    label: "Option 2",
-    image: "https://picsum.photos/id/24/367/267",
-  },
-];
+
+type Options = {
+  value: string;
+  label: string;
+  image?: string;  // If you need to show an image, include this field
+};
+
+type CommunityOption = {
+  name: string;
+  logoUrl?: string;
+};
 
 export default function CreatePostDialog() {
   const { toast } = useToast(); // Use the toast hook
@@ -42,10 +39,39 @@ export default function CreatePostDialog() {
   const [body, setBody] = useState("");
   const [links, setLinks] = useState("");
   const [images, setImages] = useState<File[]>([]);
+  const [optionsCommunity, setOptionsCommunity] = useState<Options[]>([]);  // Options[] type
 
   // Retrieve the user info from the Redux store
   const userId = useSelector((state: RootState) => state.user.userInfo?.userId);
+  const token = useSelector((state: RootState) => state.user.token);
 
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      if (userId) {
+        try {
+          const response = await axios.get(`http://localhost:8080/api/community/subscribed/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          
+          // Mapping CommunityOption[] to Options[]
+          const communityOptions: Options[] = response.data.map((community: CommunityOption) => ({
+            value: community.name,  // This will be the value sent to the backend
+            label: community.name,  // This will be displayed in the dropdown
+            image: community.logoUrl  // Optional: the community's logo
+          }));
+  
+          setOptionsCommunity(communityOptions);
+        } catch (error) {
+          console.error("Error fetching communities:", error);
+        }
+      }
+    };
+  
+    fetchCommunities();
+  }, [userId, token]);  // Fetch communities when userId or token is available
+  
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setImages(Array.from(e.target.files));
@@ -99,6 +125,7 @@ export default function CreatePostDialog() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`, // Send token for authorization
           },
         }
       );
@@ -152,8 +179,8 @@ export default function CreatePostDialog() {
             widthDesktop="full"
             widthMobile="full"
             initialSelection="Select a Community"
-            options={optionsCommunity}
-            showImages={true}
+            options={optionsCommunity}  // The correctly mapped options
+            showImages={true}  // If you want to show images in the dropdown
             onSelectionChange={setCommunity}
           />
           <div className="grid grid-cols-4 items-center gap-4">

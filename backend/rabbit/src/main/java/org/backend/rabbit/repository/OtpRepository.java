@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface OtpRepository extends JpaRepository<Otp, Long> {
     Optional<Otp> findByUserAndOtpCode(User user, String otpCode);
-
-    List<Otp> findByIsVerifiedFalseAndGeneratedAtBefore(Instant expirationTime);
+    Optional<Otp> findByUser(User user);
+    void deleteByUser(User user);
+    List<Otp> findByUser_EnabledFalseAndGeneratedAtBefore(Instant expirationTime);
 }

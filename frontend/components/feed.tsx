@@ -38,21 +38,25 @@ const items = [
     src: "https://picsum.photos/id/237/200/300",
     title: "Card Title 2",
     category: "Category 2",
-    content: <p>This is the content for card 1.</p>,
+    content: <p>This is the content for card 2.</p>,
   },
   {
     src: "https://picsum.photos/id/237/200/300",
     title: "Card Title 3",
     category: "Category 3",
-    content: <p>This is the content for card 1.</p>,
+    content: <p>This is the content for card 3.</p>,
   },
 ];
+interface FeedProps {
+  selectedCategory: string;
+}
 
-export default function Feed() {
+const Feed: React.FC<FeedProps> = ({ selectedCategory }) => {
   const [cards, setCards] = useState<JSX.Element[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("all"); // Default to "All"
 
+  // Set up carousel cards
   useEffect(() => {
     setCards(
       items.map((item, index) => (
@@ -61,22 +65,30 @@ export default function Feed() {
     );
   }, []);
 
-  useEffect(() => {
+   // Fetch posts based on the selected category (Trending, Most Liked, New)
+   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/posts/getposts");
+        const categoryEndpoint =
+          selectedCategory === "Trending"
+            ? "getTrendingPosts"
+            : selectedCategory === "Most Liked"
+            ? "getMostLikedPosts"
+            : "getNewPosts";
+
+        const response = await axios.get(`http://localhost:8080/api/posts/${categoryEndpoint}`);
         setPosts(response.data);
-        console.log(response.data);
       } catch (err) {
         console.error("Error fetching posts:", err);
       }
     };
     fetchPosts();
-  }, []);
+  }, [selectedCategory]); // Ensure this useEffect runs when `selectedCategory` changes
 
   const handleSelectionChange = (value: string) => {
-    setSelectedCountry(value);
+    setSelectedCountry(value); // Handle country selection (this can be used for filtering in future)
   };
+
 
   return (
     <>
@@ -122,3 +134,5 @@ export default function Feed() {
     </>
   );
 }
+
+export default Feed;

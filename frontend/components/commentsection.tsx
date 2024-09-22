@@ -121,8 +121,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
         return (
             <div className={parentId ? "ml-5 pl-4 border-l-2 border-gray-300" : ""}>
                 {comments.filter(comment => comment.parentId === parentId).map((comment) => (<div key={comment.id} className="pb-4 mb-4">
-                    <div className="text-sm text-gray-600">
-                        <button
+                    <div className="text-sm text-gray-600 font-head">
+                        {/* <button
                             onClick={() => handleVote(comment.id, 'up')}
                             className={`mr-2 ${comment.upClicked ? 'text-green-600' : 'hover:text-green-600'}`}>
                             ↑
@@ -131,13 +131,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                             onClick={() => handleVote(comment.id, 'down')}
                             className={`${comment.downClicked ? 'text-red-600' : 'hover:text-red-600'}`}>
                             ↓
-                        </button>
-                        <span className="ml-2">{comment.votes} points</span> by {comment.username} at {new Date(comment.createdAt).toLocaleString()}
+                        </button> */}
+                        <span className=""> by {comment.username} at {new Date(comment.createdAt).toLocaleString()}</span>
                     </div>
-                    <p>{comment.text}</p>
+                    <p className='font-lato text-lg'>{comment.text}</p>
                     <button
                         onClick={() => setReplyTo(comment.id)}
-                        className="text-sm text-blue-600 hover:underline">
+                        className="text-md text-blue-600 hover:underline">
                         Reply
                     </button>
                     {replyTo === comment.id && (

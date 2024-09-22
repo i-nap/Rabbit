@@ -14,7 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +40,38 @@ public class PostService {
 
     @Autowired
     private PostRepository postRepository;
+
+    private final String uploadDirectory = "C:/uploads/";  // Choose a permanent directory
+
+    // Fetch posts for a specific community and return them as PostDTOs
+    public List<PostDTO> getPostsByCommunity(String communityName) {
+        List<Post> posts = postRepository.findByCommunity_Name(communityName);
+        return posts.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    // Map Post entity to PostDTO
+    private PostDTO mapToDTO(Post post) {
+        return PostDTO.builder()
+                .id(post.getId())
+                .community(post.getCommunity().getName())
+                .communityImage(post.getCommunity().getLogoUrl()) // Assuming logo URL is stored in Community
+                .time(formatTime(post.getCreatedAt())) // Format Instant to a readable time format
+                .title(post.getTitle())
+                .content(post.getContent())
+                .votes(post.getVotes())
+                .comments(post.getComments().size()) // Count the comments
+                .username(post.getUser().getUsername()) // Expose the username of the post creator
+                .imageUrl(post.getImageUrl()) // Optional image URL for the post
+                .userId(post.getUser().getId()) // Add user ID
+                .build();
+    }
+
+    // Helper method to format time
+    private String formatTime(Instant createdAt) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                .withZone(ZoneOffset.UTC);
+        return formatter.format(createdAt);
+    }
 
     public List<PostDTO> getAllPosts() {
         List<Post> posts = postRepository.findAll();
@@ -133,15 +171,15 @@ public class PostService {
 
 
     public void createPost(PostCreationDTO postDto, List<MultipartFile> images) {
-        // Find the community by ID or name
+        // Find the community by name
         Community community = communityRepository.findByName(postDto.getCommunity())
                 .orElseThrow(() -> new IllegalArgumentException("Community not found"));
-        System.out.println(postDto.getUserId());
-        // Find the user by ID from the postDto
-        User user = userRepository.findById(postDto.getUserId())  // Fetch user based on the passed userId
+
+        // Find the user by ID
+        User user = userRepository.findById(postDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Create the post
+        // Create the post entity
         Post post = new Post();
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getBody());
@@ -150,25 +188,55 @@ public class PostService {
         post.setLinks(postDto.getLinks());
         post.setCreatedAt(Instant.now());
 
-        // Process images and store URLs (you can store them locally or on cloud storage)
+        // Save and process images if present
         if (images != null && !images.isEmpty()) {
-            for (MultipartFile image : images) {
-                String imageUrl = saveImage(image);  // Implement saveImage method
-                post.setImageUrl(imageUrl);
-                break; // If you want multiple images, handle this differently
-            }
+            String imageUrls = saveImages(images);
+            post.setImageUrl(imageUrls); // Set the image URL
         }
 
-        // Save the post
+        // Save the post to the repository
         postRepository.save(post);
     }
 
-    // Mock implementation to save image and return URL
-    private String saveImage(MultipartFile image) {
-        String imageUrl = "/uploads/" + UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-        return imageUrl;
+    // Helper method to save images and return URLs as a comma-separated string (for multiple images)
+    private String saveImages(List<MultipartFile> images) {
+        StringBuilder imageUrls = new StringBuilder();
+
+        for (MultipartFile image : images) {
+            try {
+                // Generate a unique filename for each image
+                String fileExtension = getFileExtension(image.getOriginalFilename());
+                String fileName = UUID.randomUUID().toString() + "." + fileExtension;
+
+                // Create directories if they don't exist
+                Path uploadPath = Paths.get(uploadDirectory, "post-images");
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath); // Create directory if it does not exist
+                }
+
+                // Save the image file
+                Path filePath = uploadPath.resolve(fileName);
+                image.transferTo(filePath.toFile());
+
+                // Append the image URL to the string builder
+                String imageUrl = "http://localhost:8080/uploads/post-images/" + fileName;
+                imageUrls.append(imageUrl).append(",");
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save image", e);
+            }
+        }
+
+        // Return the image URLs (trimmed if necessary)
+        return imageUrls.length() > 0 ? imageUrls.substring(0, imageUrls.length() - 1) : "";
     }
 
+    // Helper method to extract file extension
+    private String getFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return "jpg"; // Default to jpg if no extension found
+        }
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
+    }
     // Method to find a post by its ID and return it as a PostDTO
     public PostDTO findPostById(Long postId) {
         // Fetch the post directly by ID
@@ -197,6 +265,39 @@ public class PostService {
         } else {
             return "downvote";
         }
+    }
+
+    // Fetch trending posts (could be based on time and number of votes)
+    public List<PostDTO> getTrendingPosts() {
+        List<Post> trendingPosts = postRepository.findTrendingPosts(); // Implement this query in PostRepository
+        return trendingPosts.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    // Fetch most liked posts (could be based on the number of votes)
+    public List<PostDTO> getMostLikedPosts() {
+        List<Post> mostLikedPosts = postRepository.findMostLikedPosts(); // Implement this query in PostRepository
+        return mostLikedPosts.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    // Fetch new posts (could be based on creation time)
+    public List<PostDTO> getNewPosts() {
+        List<Post> newPosts = postRepository.findNewPosts(); // Implement this query in PostRepository
+        return newPosts.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    private PostDTO convertToDTO(Post post) {
+        PostDTO postDTO = new PostDTO();
+        postDTO.setId(post.getId());
+        postDTO.setCommunity(post.getCommunity().getName());
+        postDTO.setCommunityImage(post.getCommunity().getLogoUrl());
+        postDTO.setTime(post.getCreatedAt().toString());
+        postDTO.setTitle(post.getTitle());
+        postDTO.setContent(post.getContent());
+        postDTO.setVotes(post.getVotes());
+        postDTO.setComments(post.getComments().size());
+        postDTO.setUsername(post.getUser().getUsername());
+        postDTO.setImageUrl(post.getImageUrl());
+        return postDTO;
     }
 
 }

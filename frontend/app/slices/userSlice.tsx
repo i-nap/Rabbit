@@ -62,6 +62,11 @@ const userSlice = createSlice({
       localStorage.setItem('userInfo', JSON.stringify(action.payload.userInfo));
       localStorage.setItem('tokenExpiration', action.payload.tokenExpiration.toString());
     },
+
+    updateUserProfile: (state, action: PayloadAction<UserState['userInfo']>) => {
+      state.userInfo = action.payload;
+    },
+
     logout: (state) => {
       state.isLoggedIn = false;
       state.token = null;
@@ -76,5 +81,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { loginSuccess, logout } = userSlice.actions;
+export const { updateUserProfile, loginSuccess, logout } = userSlice.actions;
 export default userSlice.reducer;

@@ -1,33 +1,39 @@
-'use client'
+'use client';
 
-import { useState } from "react";
-import { Button } from "../ui/button";
-import { FormField } from "./formfield";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
-import axios from "axios";
-import { PasswordInput } from "../ui/passwordinput";
+import { useState, useEffect } from 'react';
+import { Button } from '../ui/button';
+import { FormField } from './formfield';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
+import axios from 'axios';
+import { PasswordInput } from '../ui/passwordinput';
 import { useRouter } from 'next/navigation'; // Use from next/navigation in Next.js 13+
+import { signIn, signOut,useSession } from 'next-auth/react'; // Import NextAuth signIn, signOut
 
 export default function SignupForm() {
   const router = useRouter();
+  const { data: session } = useSession(); // Get session data from NextAuth
 
   const handleLoginClick = () => {
-    const url = `/?login=true`; // Instead of using an object, create the full URL manually
+    const url = `/?login=true`; // Construct URL for login redirection
     router.push(url); // Push the constructed URL
   };
 
   const [formData, setFormData] = useState({
-    fName: "",
-    lName: "",
-    username: "",
-    email: "",
-    password: "",
-    cpassword: "",
+    fName: '',
+    lName: '',
+    username: '',
+    email: '',
+    password: '',
+    cpassword: '',
   });
-  const [otp, setOtp] = useState(""); // Separate state for OTP
-  const [isOtpSent, setIsOtpSent] = useState(false); // Track OTP sent state
-  const [isOtpVerified, setIsOtpVerified] = useState(false); // Track OTP verification status
-  const [errors, setErrors] = useState<{ [key: string]: string }>({}); // Track field-specific errors
+
+  const [otp, setOtp] = useState('');
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [otpError, setOtpError] = useState<string | null>(null); // Track OTP-specific errors
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track form submission state
 
   // Handle input field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,74 +42,121 @@ export default function SignupForm() {
       ...formData,
       [id]: value,
     });
-    setErrors({}); // Clear errors when user types
+    setErrors({});
   };
 
   // Form validation function
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.fName) newErrors.fName = "First name is required";
-    if (!formData.lName) newErrors.lName = "Last name is required";
-    if (!formData.username) newErrors.username = "Username is required";
-    if (!formData.email) newErrors.email = "Email is required";
-    if (!formData.password) newErrors.password = "Password is required";
-    if (formData.password !== formData.cpassword) newErrors.cpassword = "Passwords must match";
+    if (!formData.fName) newErrors.fName = 'First name is required';
+    if (!formData.lName) newErrors.lName = 'Last name is required';
+    if (!formData.username) newErrors.username = 'Username is required';
+    if (!formData.email) newErrors.email = 'Email is required';
+    if (!formData.password) newErrors.password = 'Password is required';
+    if (formData.password !== formData.cpassword) newErrors.cpassword = 'Passwords must match';
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0; // Return true if no errors
+    return Object.keys(newErrors).length === 0;
   };
 
   // Handle form submission (registration)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrors({}); // Clear any previous errors
+    setErrors({});
+    setIsSubmitting(true); // Start the submission process
 
-    if (!validateForm()) return; // If validation fails, prevent form submission
+    if (!validateForm()) return;
 
     if (!isOtpSent) {
       // Registration request
       try {
-        const response = await axios.post("http://localhost:8080/api/auth/register", formData, {
+        const response = await axios.post('http://localhost:8080/api/auth/register', formData, {
           headers: {
             'Content-Type': 'application/json',
           },
         });
         console.log(response.data);
         setIsOtpSent(true); // OTP has been sent
+        setIsSubmitting(false); // Stop the submission process
+
       } catch (error: any) {
-        // Handle backend errors like duplicate email/username here
-        if (error.response?.data.includes("Username")) {
-          setErrors({ username: "Username is already taken." });
+        if (error.response?.data.includes('Username')) {
+          setErrors({ username: 'Username is already taken.' });
         }
-        if (error.response?.data.includes("Email")) {
-          setErrors({ email: "Email is already registered." });
+        if (error.response?.data.includes('Email')) {
+          setErrors({ email: 'Email is already registered.' });
         }
+        setIsSubmitting(false); // Stop the submission process on error
+
       }
     } else {
       // OTP verification request
       try {
-        const response = await axios.post("http://localhost:8080/api/auth/verify-otp", {
+        const response = await axios.post('http://localhost:8080/api/auth/verify-otp', {
           username: formData.username,
-          otp: otp, // Sending only username and OTP for verification
+          otp: otp,
         });
         if (response.status === 200) {
           setIsOtpVerified(true);
-          alert("Signup successful!");
+          setTimeout(() => {
+            alert('Signup successful! Please log in.');
+            router.push('/');
+          }, 1500); // Redirect with a short delay
         } else {
-          alert("Invalid or expired OTP. Please try again.");
+          setOtpError('Invalid or expired OTP. Please try again.');
         }
+        setIsSubmitting(false); // Stop the submission process
+
       } catch (error) {
-        console.error("Error during OTP verification:", error);
+        setOtpError('Error verifying OTP. Please try again.');
+        console.error('Error during OTP verification:', error);
       }
+      setIsSubmitting(false); // Stop the submission process on error
+
     }
+  };
+
+
+  // Authenticate with the backend after Google login
+  useEffect(() => {
+    const authenticateWithBackend = async () => {
+      if (session && session.accessToken && session.user) {
+        try {
+          // Prepare the data to send to the backend
+          const userInfo = {
+            idToken: session.accessToken, // Send the Google accessToken to the backend
+            email: session.user?.email || '',
+            name: session.user?.name || '',
+            picture: session.user?.image || '',
+          };
+
+          // Post user information to the backend
+          await axios.post('http://localhost:8080/api/auth/oauth/google', userInfo);
+          await signOut({ redirect: false });
+
+          // After backend authentication, redirect the user to the login page
+          router.push('/');
+          alert('Signup successful! Please log in.');
+        } catch (error) {
+          setError('Backend authentication failed');
+        }
+      }
+    };
+
+    authenticateWithBackend();
+  }, [session, router]);
+
+  // Trigger Google sign-in using NextAuth.js
+  const handleGoogleSignIn = () => {
+    signIn('google', { redirect: false }) // Prevent redirect
   };
 
   return (
     <>
       {!isOtpVerified ? (
-        <form onSubmit={handleSubmit} className={!isOtpSent ? "grid grid-cols-1 gap-6 md:grid-cols-2" : "flex flex-col items-center justify-center w-full"}>
+        <form onSubmit={handleSubmit} className={!isOtpSent ? 'grid grid-cols-1 gap-6 md:grid-cols-2' : 'flex flex-col items-center justify-center w-full'}>
           {/* Registration Fields */}
           {!isOtpSent ? (
             <>
@@ -113,7 +166,7 @@ export default function SignupForm() {
                 type="text"
                 value={formData.fName}
                 onChange={handleChange}
-                className={`${errors.fName ? 'border-red-500' : 'border-gray-300'} border`} // Conditional class for error
+                className={`${errors.fName ? 'border-red-500' : 'border-gray-300'} border`}
               />
 
               <FormField
@@ -122,7 +175,7 @@ export default function SignupForm() {
                 type="text"
                 value={formData.lName}
                 onChange={handleChange}
-                className={`${errors.lName ? 'border-red-500' : 'border-gray-300'} border`} // Conditional class for error
+                className={`${errors.lName ? 'border-red-500' : 'border-gray-300'} border`}
               />
 
               <FormField
@@ -131,7 +184,7 @@ export default function SignupForm() {
                 type="text"
                 value={formData.username}
                 onChange={handleChange}
-                className={`${errors.username ? 'border-red-500' : 'border-gray-300'} border`} // Conditional class for error
+                className={`${errors.username ? 'border-red-500' : 'border-gray-300'} border`}
               />
 
               <FormField
@@ -140,7 +193,7 @@ export default function SignupForm() {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`${errors.email ? 'border-red-500' : 'border-gray-300'} border`} // Conditional class for error
+                className={`${errors.email ? 'border-red-500' : 'border-gray-300'} border`}
               />
 
               <PasswordInput
@@ -148,7 +201,7 @@ export default function SignupForm() {
                 label="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`${errors.password ? 'border-red-500' : 'border-gray-300'} border`} // Conditional class for error
+                className={`${errors.password ? 'border-red-500' : 'border-gray-300'} border`}
               />
 
               <PasswordInput
@@ -156,12 +209,14 @@ export default function SignupForm() {
                 label="Confirm Password"
                 value={formData.cpassword}
                 onChange={handleChange}
-                className={`${errors.cpassword ? 'border-red-500' : 'border-gray-300'} border`} // Conditional class for error
+                className={`${errors.cpassword ? 'border-red-500' : 'border-gray-300'} border`}
               />
 
               <div className="col-span-1 md:col-span-2">
-                <Button type="submit" className="w-full mb-[8px]">Create Account</Button>
-                <Button
+              <Button type="submit" className="w-full mb-[8px]" disabled={isSubmitting}>
+                  {isSubmitting ? 'Processing...' : 'Create Account'}
+                </Button>                <Button
+                  onClick={handleGoogleSignIn}
                   variant="outline"
                   className="w-full flex items-center justify-center space-x-2"
                 >
@@ -176,28 +231,24 @@ export default function SignupForm() {
                   <span>Sign in with Google</span>
                 </Button>
                 <div className="flex ">
-                {errors.fName && <p className="text-red-500 text-sm mt-1">{errors.fName}</p>}
-                {errors.lName && <p className="text-red-500 text-sm mt-1">{errors.lName}</p>}
-                {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
-                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-                {errors.cpassword && <p className="text-red-500 text-sm mt-1">{errors.cpassword}</p>}
-                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  {errors.fName && <p className="text-red-500 text-sm mt-1">{errors.fName}</p>}
+                  {errors.lName && <p className="text-red-500 text-sm mt-1">{errors.lName}</p>}
+                  {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
+                  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                  {errors.cpassword && <p className="text-red-500 text-sm mt-1">{errors.cpassword}</p>}
+                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                 </div>
 
                 <span className="font-lato text-[16px] text-gray-500 mb-[1rem] block">
-          Already have an account?&nbsp;
-          <a
-          href="#"
-            onClick={handleLoginClick}
-            className="hover:text-gray-500 transition-all duration-200 ease-in-out text-black"
-          >
-            Login
-          </a>
-        </span>
-
-
-
-
+                  Already have an account?&nbsp;
+                  <a
+                    href="#"
+                    onClick={handleLoginClick}
+                    className="hover:text-gray-500 transition-all duration-200 ease-in-out text-black"
+                  >
+                    Login
+                  </a>
+                </span>
               </div>
             </>
           ) : (
@@ -216,9 +267,12 @@ export default function SignupForm() {
                   </InputOTPGroup>
                 </InputOTP>
 
+                {otpError && <p className="text-red-500 text-sm">{otpError}</p>}
+
                 <div className="w-full max-w-xs">
-                  <Button type="submit" className="w-full">Verify OTP</Button>
-                </div>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? 'Processing...' : 'Verify OTP'}
+                  </Button>                </div>
               </div>
             </>
           )}

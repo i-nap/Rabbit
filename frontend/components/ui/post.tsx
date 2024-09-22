@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ArrowDown, ArrowUp, MessageCircle } from 'lucide-react';
+import { ArrowDown, ArrowUp, Download, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import axios from 'axios';
@@ -122,14 +122,33 @@ const FeedPost: React.FC<FeedPostProps> = ({
   // Handlers for upvote and downvote clicks
   const handleUpClick = () => handleVote(true);
   const handleDownClick = () => handleVote(false);
-
+  
+  const handleDownload = async (imageUrl: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'image.jpg'); // You can specify the filename here
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download image:', error);
+    }
+  };
+  
   return (
     <div className="bg-white rounded-xl shadow-md p-4 mb-[2rem] hover:shadow-lg transition-all duration-200 ease-in-out text-text">
-      {/* Post Header: Community Image, Community Name, and Time */}
       <div className="flex items-center mb-2 font-lato">
         <div className="relative w-6 h-6 mr-2">
           <Image
-            src={communityImage}
+            src={communityImage || '/logo.svg'}
             alt={`b/${community}`}
             fill
             className="rounded-full"
@@ -137,50 +156,32 @@ const FeedPost: React.FC<FeedPostProps> = ({
         </div>
         <span className="font-bold text-sm">b/{community}</span>
         <span className="font-bold text-sm ml-2">{username}</span>
-        <span className="text-xs text-subtext ml-2">{time}</span>
+        <span className="text-xs text-subtext ml-2">  {new Date(time).toLocaleString()}
+</span>
       </div>
 
-      {/* Post Title and Content */}
       <h2 className="text-2xl font-bold mb-2 font-head">{title}</h2>
       <p className="text-subtext mb-4 font-lato text-[16px]">{content}</p>
 
-      {/* Conditional Image Rendering */}
       {imageUrl && (
-        <div className="mb-4 w-full">
-          <div className="relative w-full h-[30rem] bg-black rounded-2xl overflow-hidden">
-            <Image
-              src={imageUrl}
-              alt={title}
-              fill
-              style={{ objectFit: 'contain' }}
-              className="absolute inset-0"
-            />
-          </div>
+        <div className="relative mb-4 w-full h-[30rem] bg-black rounded-2xl overflow-hidden">
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            style={{ objectFit: 'contain' }}
+            className="absolute inset-0"
+          />
         </div>
       )}
 
-      {/* Voting and Comments Section */}
       <div className="flex items-center space-x-5">
-        {/* Voting Buttons and Count */}
         <div className="flex font-medium font-head text-[20px] justify-center items-center">
-          <ArrowUp
-            className={`cursor-pointer transition-all duration-200 ease-in-out ${
-              upClicked ? 'text-green-500' : 'hover:text-gray-500'
-            }`}
-            onClick={handleUpClick}
-            aria-label="Upvote"
-          />
+          <ArrowUp className={`cursor-pointer ${upClicked ? 'text-green-500' : 'hover:text-gray-500'}`} onClick={handleUpClick} />
           <span className="ml-2 mr-2">{voteCount}</span>
-          <ArrowDown
-            className={`cursor-pointer transition-all duration-200 ease-in-out ${
-              downClicked ? 'text-red-500' : 'hover:text-gray-500'
-            }`}
-            onClick={handleDownClick}
-            aria-label="Downvote"
-          />
+          <ArrowDown className={`cursor-pointer ${downClicked ? 'text-red-500' : 'hover:text-gray-500'}`} onClick={handleDownClick} />
         </div>
 
-        {/* Comments Button */}
         <div className="flex space-x-2">
           <Link href={`/${id}`}>
             <Button className="w-20 hover:text-gray-500 transition-all duration-200 ease-in-out">
@@ -188,10 +189,17 @@ const FeedPost: React.FC<FeedPostProps> = ({
               <span className="ml-1">{comments}</span>
             </Button>
           </Link>
+          {imageUrl && (
+            <Button onClick={() => handleDownload(imageUrl)}>
+              <Download className="w-5 h-5" />
+
+            </Button>
+          )}
         </div>
       </div>
     </div>
   );
 };
+
 
 export default React.memo(FeedPost);

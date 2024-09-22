@@ -25,6 +25,15 @@ public class PostController {
         return postService.getAllPosts();
     }
 
+    @GetMapping("/{communityName}/posts")
+    public ResponseEntity<List<PostDTO>> getPostsByCommunity(@PathVariable String communityName) {
+        List<PostDTO> posts = postService.getPostsByCommunity(communityName);
+        if (posts.isEmpty()) {
+            return ResponseEntity.noContent().build();  // Return 204 No Content if no posts are found
+        }
+        return ResponseEntity.ok(posts);  // Return PostDTO list
+    }
+
     @GetMapping("/{postId}")
     public ResponseEntity<PostDTO> getPostById(@PathVariable Long postId) {
         // Fetch the post from the service layer using postId
@@ -46,12 +55,29 @@ public class PostController {
             @RequestPart("post") PostCreationDTO postDto,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
 
-        postService.createPost(postDto, images); // Implement this in the service layer
+        postService.createPost(postDto, images);
 
-        // Create a response map to include a message
         Map<String, String> response = new HashMap<>();
         response.put("message", "Post created successfully!");
 
         return ResponseEntity.ok(response);
+    }
+
+    // Fetch trending posts
+    @GetMapping("/getTrendingPosts")
+    public List<PostDTO> getTrendingPosts() {
+        return postService.getTrendingPosts();
+    }
+
+    // Fetch most liked posts
+    @GetMapping("/getMostLikedPosts")
+    public List<PostDTO> getMostLikedPosts() {
+        return postService.getMostLikedPosts();
+    }
+
+    // Fetch new posts
+    @GetMapping("/getNewPosts")
+    public List<PostDTO> getNewPosts() {
+        return postService.getNewPosts();
     }
 }

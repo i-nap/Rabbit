@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommunityDTO {
+    private Long id;
     private String name;
     private String description;
     private List<String> tags;
@@ -19,4 +20,19 @@ public class CommunityDTO {
     private String logoUrl;
     private String coverImageUrl;
     private Long userId;
+    private String newName;
+    public CommunityDTO(String name, String description, String logoUrl, String coverImageUrl, List<String> tags, Long createdBy,String links) {
+        this.name = name;
+        this.description = description;
+        this.logoUrl = logoUrl;
+        this.coverImageUrl = coverImageUrl;
+        this.tags = tags;
+        this.links = links;
+    }
+    // Add a constructor that takes id, name, and logoUrl
+    public CommunityDTO(Long id, String name, String logoUrl) {
+        this.id = id;
+        this.name = name;
+        this.logoUrl = logoUrl;
+    }
 }
